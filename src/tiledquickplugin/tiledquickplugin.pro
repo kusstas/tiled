@@ -1,5 +1,5 @@
 include(../../tiled.pri)
-include(../libtiled/libtiled.pri)
+include(../libtiled/libtiled-static.pri)
 
 TEMPLATE = lib
 TARGET = tiledquickplugin
@@ -31,6 +31,11 @@ macx {
 
 TARGET = $$qtLibraryTarget($$TARGET)
 uri = org.mapeditor.Tiled
+
+ios {
+    CONFIG += qt static
+    QMAKE_MOC_OPTIONS += -Muri=$$uri
+}
 
 # Input
 SOURCES += \
@@ -64,3 +69,6 @@ unix {
     target.path = $$installPath
     INSTALLS += target qmldir
 }
+
+RESOURCES += \
+    tiledquick.qrc
