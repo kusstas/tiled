@@ -39,19 +39,23 @@ ios {
 
 # Input
 SOURCES += \
+    imagemapobject.cpp \
+    layeritem.cpp \
+    objectlayeritem.cpp \
     tiledquickplugin.cpp \
     mapitem.cpp \
     maploader.cpp \
-    tilelayeritem.cpp \
-    tilesnode.cpp
+    tilelayeritem.cpp
 
 HEADERS += \
+    imagemapobject.h \
+    layeritem.h \
+    objectlayeritem.h \
     tiledquickplugin.h \
     mapitem.h \
     maploader.h \
     mapref.h \
-    tilelayeritem.h \
-    tilesnode.h
+    tilelayeritem.h
 
 OTHER_FILES = qmldir
 

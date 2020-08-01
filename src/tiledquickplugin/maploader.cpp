@@ -27,7 +27,8 @@
 
 using namespace TiledQuick;
 
-MapLoader::MapLoader(QObject *parent)
+
+MapLoader::MapLoader(QObject* parent)
     : QObject(parent)
     , m_map(nullptr)
     , m_status(Null)
@@ -38,10 +39,12 @@ MapLoader::~MapLoader()
 {
 }
 
-void MapLoader::setSource(const QUrl &source)
+void MapLoader::setSource(QUrl const& source)
 {
     if (m_source == source)
+    {
         return;
+    }
 
     m_source = source;
 
@@ -51,9 +54,9 @@ void MapLoader::setSource(const QUrl &source)
     Status status = map ? Ready : Error;
     QString error = map ? QString() : mapReader.errorString();
 
-    const bool mapDiff = m_map != map;
-    const bool statusDiff = m_status != status;
-    const bool errorDiff = m_error != error;
+    bool const mapDiff = m_map != map;
+    bool const statusDiff = m_status != status;
+    bool const errorDiff = m_error != error;
 
     m_map = std::move(map);
     m_status = status;
@@ -62,9 +65,15 @@ void MapLoader::setSource(const QUrl &source)
     emit sourceChanged(source);
 
     if (mapDiff)
+    {
         emit mapChanged(m_map.get());
+    }
     if (statusDiff)
+    {
         emit statusChanged(status);
+    }
     if (errorDiff)
+    {
         emit errorChanged(error);
+    }
 }

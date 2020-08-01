@@ -20,22 +20,20 @@
 
 #pragma once
 
-#include <QQuickItem>
+#include "layeritem.h"
 
-#include "tilelayer.h"
 
-namespace Tiled {
-class MapRenderer;
+namespace Tiled
+{
+class TileLayer;
 }
 
-namespace TiledQuick {
-
-class MapItem;
-
+namespace TiledQuick
+{
 /**
  * A graphical item displaying a tile layer in a Qt Quick scene.
  */
-class TileLayerItem : public QQuickItem
+class TileLayerItem : public LayerItem
 {
     Q_OBJECT
 
@@ -46,54 +44,15 @@ public:
      * @param layer    the tile layer to be displayed
      * @param renderer the map renderer to use to render the layer
      */
-    TileLayerItem(Tiled::TileLayer *layer, Tiled::MapRenderer *renderer,
-                  MapItem *parent);
+    TileLayerItem(Tiled::TileLayer* layer, Tiled::MapRenderer* renderer, MapItem* parent);
 
-    /**
-     * Updates the size and position of this item. Should be called when the
-     * size of either the tile layer or its associated map have changed.
-     *
-     * Calling this function when the size of the map changes is necessary
-     * because in certain map orientations this affects the layer position
-     * (when using the IsometricRenderer for example).
-     */
-    void syncWithTileLayer();
-
-    QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *);
-
-public slots:
-    void updateVisibleTiles();
+protected:
+    void paint(QPainter* painter) override;
 
 private:
-    void layerVisibilityChanged();
+    void updateRect();
 
-    Tiled::TileLayer *mLayer;
-    Tiled::MapRenderer *mRenderer;
-    QRectF mVisibleArea;
+private slots:
+    void onVisibilityChanged();
 };
-
-/**
- * A graphical item displaying a single tile in a Qt Quick scene.
- */
-class TileItem : public QQuickItem
-{
-    Q_OBJECT
-
-public:
-    TileItem(const Tiled::Cell &cell, QPoint position, MapItem *parent);
-
-    QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *);
-
-    QPoint position() const;
-
-private:
-    Tiled::Cell mCell;
-    QPoint mPosition;
-};
-
-inline QPoint TileItem::position() const
-{
-    return mPosition;
-}
-
 } // namespace TiledQuick

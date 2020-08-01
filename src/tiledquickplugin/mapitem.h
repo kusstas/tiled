@@ -22,23 +22,27 @@
 
 #include "mapref.h"
 
-#include <QQuickItem>
+#include <QQuickPaintedItem>
+#include <QSharedPointer>
+#include <QUrl>
 
 #include <memory>
 
-namespace Tiled {
+namespace Tiled
+{
 class MapRenderer;
 } // namespace Tiled
 
-namespace TiledQuick {
-
-class TileItem;
+namespace TiledQuick
+{
+class LayerItem;
 class TileLayerItem;
+class ObjectLayerItem;
 
 /**
  * A declarative item that displays a map.
  */
-class MapItem : public QQuickItem
+class MapItem : public QQuickPaintedItem
 {
     Q_OBJECT
 
@@ -46,53 +50,61 @@ class MapItem : public QQuickItem
     Q_PROPERTY(QRectF visibleArea READ visibleArea WRITE setVisibleArea NOTIFY visibleAreaChanged)
 
 public:
-    explicit MapItem(QQuickItem *parent = nullptr);
+    explicit MapItem(QQuickItem* parent = nullptr);
     ~MapItem();
 
     MapRef map() const;
     void setMap(MapRef map);
     void unsetMap();
 
-    const QRectF &visibleArea() const;
-    void setVisibleArea(const QRectF &visibleArea);
+    QRectF const& visibleArea() const;
+    void setVisibleArea(QRectF const& visibleArea);
 
-    QRectF boundingRect() const;
+    QRectF boundingRect() const override;
 
     Q_INVOKABLE QPointF screenToTileCoords(qreal x, qreal y) const;
-    Q_INVOKABLE QPointF screenToTileCoords(const QPointF &position) const;
+    Q_INVOKABLE QPointF screenToTileCoords(QPointF const& position) const;
     Q_INVOKABLE QPointF tileToScreenCoords(qreal x, qreal y) const;
-    Q_INVOKABLE QPointF tileToScreenCoords(const QPointF &position) const;
+    Q_INVOKABLE QPointF tileToScreenCoords(QPointF const& position) const;
     Q_INVOKABLE QPointF screenToPixelCoords(qreal x, qreal y) const;
-    Q_INVOKABLE QPointF screenToPixelCoords(const QPointF &position) const;
+    Q_INVOKABLE QPointF screenToPixelCoords(QPointF const& position) const;
     Q_INVOKABLE QPointF pixelToScreenCoords(qreal x, qreal y) const;
-    Q_INVOKABLE QPointF pixelToScreenCoords(const QPointF &position) const;
+    Q_INVOKABLE QPointF pixelToScreenCoords(QPointF const& position) const;
     Q_INVOKABLE QPointF pixelToTileCoords(qreal x, qreal y) const;
-    Q_INVOKABLE QPointF pixelToTileCoords(const QPointF &position) const;
+    Q_INVOKABLE QPointF pixelToTileCoords(QPointF const& position) const;
 
-    void componentComplete();
+    void componentComplete() override;
 
 signals:
     void mapChanged();
     void visibleAreaChanged();
 
+protected:
+    void paint(QPainter* painter) override;
+
 private:
     void refresh();
+    void attachColorOverlay(LayerItem* layer);
 
-    Tiled::Map *mMap;
-    QRectF mVisibleArea;
+private:
+    static QUrl const TINT_COLOR_OVERLAY_URL;
+    static QSharedPointer<QQmlComponent> tintColorOverlayComponent;
 
-    std::unique_ptr<Tiled::MapRenderer> mRenderer;
-    QList<TileLayerItem*> mTileLayerItems;
+    Tiled::Map* m_map;
+    QRectF m_visibleArea;
+
+    std::unique_ptr<Tiled::MapRenderer> m_renderer;
+    QList<LayerItem*> m_layerItems;
 };
 
-inline const QRectF &MapItem::visibleArea() const
+inline QRectF const& MapItem::visibleArea() const
 {
-    return mVisibleArea;
+    return m_visibleArea;
 }
 
 inline MapRef MapItem::map() const
 {
-    return mMap;
+    return m_map;
 }
 
 inline void MapItem::unsetMap()

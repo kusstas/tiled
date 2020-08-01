@@ -27,8 +27,9 @@
 
 #include <memory>
 
-namespace TiledQuick {
 
+namespace TiledQuick
+{
 class MapLoader : public QObject
 {
     Q_OBJECT
@@ -39,14 +40,15 @@ class MapLoader : public QObject
     Q_PROPERTY(QString error READ error NOTIFY errorChanged)
 
 public:
-    enum Status {
+    enum Status
+    {
         Null,
         Ready,
         Error
     };
     Q_ENUM(Status)
 
-    explicit MapLoader(QObject *parent = nullptr);
+    explicit MapLoader(QObject* parent = nullptr);
     ~MapLoader();
 
     QUrl source() const;
@@ -55,13 +57,13 @@ public:
     QString error() const;
 
 signals:
-    void sourceChanged(const QUrl &source);
-    void mapChanged(Tiled::Map *map);
+    void sourceChanged(QUrl const& source);
+    void mapChanged(Tiled::Map* map);
     void statusChanged(Status status);
-    void errorChanged(const QString &error);
+    void errorChanged(QString const& error);
 
 public slots:
-    void setSource(const QUrl &source);
+    void setSource(QUrl const& source);
 
 private:
     QUrl m_source;
@@ -90,5 +92,4 @@ inline QUrl MapLoader::source() const
 {
     return m_source;
 }
-
 } // namespace TiledQuick

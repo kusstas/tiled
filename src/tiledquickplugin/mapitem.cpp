@@ -21,6 +21,7 @@
 #include "mapitem.h"
 
 #include "tilelayeritem.h"
+#include "objectlayeritem.h"
 
 #include "hexagonalrenderer.h"
 #include "isometricrenderer.h"
@@ -29,13 +30,24 @@
 #include "staggeredrenderer.h"
 #include "tilelayer.h"
 
+#include <QPainter>
+#include <QQmlContext>
+#include <QQmlEngine>
+#include <QQmlComponent>
 #include <cmath>
 
-using namespace TiledQuick;
+
+namespace TiledQuick
+{
+constexpr auto PARENT_PROP = "parent";
+constexpr auto LAYER_PROP = "tiledLayer";
+
+QUrl const MapItem::TINT_COLOR_OVERLAY_URL("qrc:/tiledquick_private_qml/TintColorOverlay.qml");
+QSharedPointer<QQmlComponent> MapItem::tintColorOverlayComponent;
 
 MapItem::MapItem(QQuickItem *parent)
-    : QQuickItem(parent)
-    , mMap(nullptr)
+    : QQuickPaintedItem(parent)
+    , m_map(nullptr)
 {
 }
 
@@ -43,140 +55,248 @@ MapItem::~MapItem() = default;
 
 void MapItem::setMap(MapRef map)
 {
-    if (mMap == map.mMap)
+    if (m_map == map.m_map)
+    {
         return;
+    }
 
-    mMap = map.mMap;
+    m_map = map.m_map;
     refresh();
     emit mapChanged();
 }
 
-void MapItem::setVisibleArea(const QRectF &visibleArea)
+void MapItem::setVisibleArea(QRectF const& visibleArea)
 {
-    mVisibleArea = visibleArea;
+    m_visibleArea = visibleArea;
     emit visibleAreaChanged();
 }
 
 QRectF MapItem::boundingRect() const
 {
-    if (!mRenderer)
-        return QRectF();
+    if (!m_renderer)
+    {
+        return QQuickPaintedItem::boundingRect();
+    }
 
-    return mRenderer->mapBoundingRect();
+    return m_renderer->mapBoundingRect();
 }
 
 QPointF MapItem::screenToTileCoords(qreal x, qreal y) const
 {
-    if (!mRenderer)
+    if (!m_renderer)
+    {
         return QPointF(x, y);
-    return mRenderer->screenToTileCoords(x, y);
+    }
+
+    return m_renderer->screenToTileCoords(x, y);
 }
 
-QPointF MapItem::screenToTileCoords(const QPointF &position) const
+QPointF MapItem::screenToTileCoords(QPointF const& position) const
 {
-    if (!mRenderer)
+    if (!m_renderer)
+    {
         return position;
-    return mRenderer->screenToTileCoords(position);
+    }
+
+    return m_renderer->screenToTileCoords(position);
 }
 
 QPointF MapItem::tileToScreenCoords(qreal x, qreal y) const
 {
-    if (!mRenderer)
+    if (!m_renderer)
+    {
         return QPointF(x, y);
-    return mRenderer->tileToScreenCoords(x, y);
+    }
+
+    return m_renderer->tileToScreenCoords(x, y);
 }
 
-QPointF MapItem::tileToScreenCoords(const QPointF &position) const
+QPointF MapItem::tileToScreenCoords(QPointF const& position) const
 {
-    if (!mRenderer)
+    if (!m_renderer)
+    {
         return position;
-    return mRenderer->tileToScreenCoords(position);
+    }
+
+    return m_renderer->tileToScreenCoords(position);
 }
 
 QPointF MapItem::screenToPixelCoords(qreal x, qreal y) const
 {
-    if (!mRenderer)
+    if (!m_renderer)
+    {
         return QPointF(x, y);
-    return mRenderer->screenToPixelCoords(x, y);
+    }
+
+    return m_renderer->screenToPixelCoords(x, y);
 }
 
-QPointF MapItem::screenToPixelCoords(const QPointF &position) const
+QPointF MapItem::screenToPixelCoords(QPointF const& position) const
 {
-    if (!mRenderer)
+    if (!m_renderer)
+    {
         return position;
-    return mRenderer->screenToPixelCoords(position);
+    }
+
+    return m_renderer->screenToPixelCoords(position);
 }
 
 QPointF MapItem::pixelToScreenCoords(qreal x, qreal y) const
 {
-    if (!mRenderer)
+    if (!m_renderer)
+    {
         return QPointF(x, y);
-    return mRenderer->pixelToScreenCoords(x, y);
+    }
+
+    return m_renderer->pixelToScreenCoords(x, y);
 }
 
-QPointF MapItem::pixelToScreenCoords(const QPointF &position) const
+QPointF MapItem::pixelToScreenCoords(QPointF const& position) const
 {
-    if (!mRenderer)
+    if (!m_renderer)
+    {
         return position;
-    return mRenderer->pixelToScreenCoords(position);
+    }
+
+    return m_renderer->pixelToScreenCoords(position);
 }
 
 QPointF MapItem::pixelToTileCoords(qreal x, qreal y) const
 {
-    if (!mRenderer)
+    if (!m_renderer)
+    {
         return QPointF(x, y);
-    return mRenderer->pixelToTileCoords(x, y);
+    }
+
+    return m_renderer->pixelToTileCoords(x, y);
 }
 
-QPointF MapItem::pixelToTileCoords(const QPointF &position) const
+QPointF MapItem::pixelToTileCoords(QPointF const& position) const
 {
-    if (!mRenderer)
+    if (!m_renderer)
+    {
         return position;
-    return mRenderer->pixelToTileCoords(position);
+    }
+
+    return m_renderer->pixelToTileCoords(position);
 }
 
 void MapItem::componentComplete()
 {
-    QQuickItem::componentComplete();
-    if (mMap)
+    QQuickPaintedItem::componentComplete();
+
+    if (!tintColorOverlayComponent)
+    {
+        tintColorOverlayComponent.reset(new QQmlComponent(qmlEngine(this), TINT_COLOR_OVERLAY_URL));
+    }
+
+    if (m_map)
+    {
         refresh();
+    }
+}
+
+void MapItem::paint(QPainter* /*painter*/)
+{
 }
 
 void MapItem::refresh()
 {
     if (!isComponentComplete())
+    {
         return;
+    }
 
-    qDeleteAll(mTileLayerItems);
-    mTileLayerItems.clear();
+    qDeleteAll(m_layerItems);
+    m_layerItems.clear();
 
-    mRenderer = nullptr;
+    m_renderer = nullptr;
 
-    if (!mMap)
+    if (!m_map)
+    {
         return;
+    }
 
-    switch (mMap->orientation()) {
-    default:
-        mRenderer = std::make_unique<Tiled::OrthogonalRenderer>(mMap);
-        break;
+    setFillColor(m_map->backgroundColor());
+
+    switch (m_map->orientation())
+    {
     case Tiled::Map::Isometric:
-        mRenderer = std::make_unique<Tiled::IsometricRenderer>(mMap);
+        m_renderer = std::make_unique<Tiled::IsometricRenderer>(m_map);
         break;
     case Tiled::Map::Staggered:
-        mRenderer = std::make_unique<Tiled::StaggeredRenderer>(mMap);
+        m_renderer = std::make_unique<Tiled::StaggeredRenderer>(m_map);
         break;
     case Tiled::Map::Hexagonal:
-        mRenderer = std::make_unique<Tiled::HexagonalRenderer>(mMap);
+        m_renderer = std::make_unique<Tiled::HexagonalRenderer>(m_map);
+        break;
+    default:
+        m_renderer = std::make_unique<Tiled::OrthogonalRenderer>(m_map);
         break;
     }
 
-    for (Tiled::Layer *layer : mMap->layers()) {
-        if (Tiled::TileLayer *tl = layer->asTileLayer()) {
-            TileLayerItem *layerItem = new TileLayerItem(tl, mRenderer.get(), this);
-            mTileLayerItems.append(layerItem);
+    for (Tiled::Layer* layer : m_map->layers())
+    {
+        LayerItem* layerItem = nullptr;
+
+        switch (layer->layerType())
+        {
+        case Tiled::Layer::TileLayerType:
+            layerItem = new TileLayerItem(layer->asTileLayer(), m_renderer.get(), this);
+            break;
+        case Tiled::Layer::ObjectGroupType:
+            layerItem = new ObjectLayerItem(layer->asObjectGroup(), m_renderer.get(), this);
+            break;
+        case Tiled::Layer::ImageLayerType:
+            break;
+        case Tiled::Layer::GroupLayerType:
+            break;
+        }
+
+        if (!layerItem)
+        {
+            continue;
+        }
+
+        m_layerItems.append(layerItem);
+
+        if (layer->tintColor().isValid())
+        {
+            attachColorOverlay(layerItem);
         }
     }
 
-    const QRect rect = mRenderer->mapBoundingRect();
+    QRect const rect = m_renderer->mapBoundingRect();
     setImplicitSize(rect.width(), rect.height());
+}
+
+void MapItem::attachColorOverlay(LayerItem* layer)
+{
+    QVariantMap const initProps =
+    {
+        {PARENT_PROP, QVariant::fromValue(this)},
+        {LAYER_PROP, QVariant::fromValue(layer)}
+    };
+
+    auto const object = tintColorOverlayComponent->createWithInitialProperties(initProps, qmlEngine(this)->contextForObject(this));
+
+    if (!object)
+    {
+        qCritical() << "Can't create color overlay for:" << layer << "reason:" << tintColorOverlayComponent->errorString();
+        return;
+    }
+
+    auto const quickItem = qobject_cast<QQuickItem*>(object);
+
+    if (!quickItem)
+    {
+        qCritical() << "Can't create color overlay for:" << layer << "reason: component should be QQuickItem";
+        object->deleteLater();
+        return;
+    }
+
+    QQmlEngine::setObjectOwnership(quickItem, QQmlEngine::CppOwnership);
+    quickItem->setParentItem(this);
+    quickItem->setParent(layer);
+}
 }

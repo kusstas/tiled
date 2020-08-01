@@ -22,26 +22,27 @@
 
 #include <QObject>
 
-namespace Tiled {
+
+namespace Tiled
+{
 class Map;
 }
 
-namespace TiledQuick {
-
+namespace TiledQuick
+{
 class MapRef
 {
     Q_GADGET
 
 public:
-    MapRef(Tiled::Map *map = nullptr)
-        : mMap(map)
+    MapRef(Tiled::Map* map = nullptr)
+        : m_map(map)
     {}
 
-    Tiled::Map *mMap;
+    Tiled::Map *m_map;
 
-    operator Tiled::Map *() const { return mMap; }
+    operator Tiled::Map* () const { return m_map; }
 };
-
 } // namespace TiledQuick
 
 Q_DECLARE_METATYPE(TiledQuick::MapRef)

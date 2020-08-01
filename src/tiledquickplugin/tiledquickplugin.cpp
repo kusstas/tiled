@@ -31,16 +31,11 @@
 
 using namespace TiledQuick;
 
-void TiledQuickPlugin::registerTypes(const char *uri)
+void TiledQuickPlugin::registerTypes(char const* uri)
 {
     // @uri org.mapeditor.Tiled
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    qmlRegisterType<MapRef>();
-#else
     qmlRegisterAnonymousType<MapRef>(uri, 1);
-#endif
-
     qmlRegisterType<MapLoader>(uri, 1, 0, "MapLoader");
     qmlRegisterType<MapItem>(uri, 1, 0, "MapItem");
 }
