@@ -23,8 +23,6 @@
 #include <QQmlExtensionPlugin>
 
 
-namespace TiledQuick
-{
 class TiledQuickPlugin : public QQmlExtensionPlugin
 {
     Q_OBJECT
@@ -32,7 +30,7 @@ class TiledQuickPlugin : public QQmlExtensionPlugin
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
 
 public:
+    TiledQuickPlugin();
+
     void registerTypes(char const* uri);
 };
-
-} // namespace TiledQuick

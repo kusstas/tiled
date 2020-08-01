@@ -31,6 +31,12 @@
 
 using namespace TiledQuick;
 
+
+TiledQuickPlugin::TiledQuickPlugin()
+{
+    Q_INIT_RESOURCE(tiledquick);
+}
+
 void TiledQuickPlugin::registerTypes(char const* uri)
 {
     // @uri org.mapeditor.Tiled
