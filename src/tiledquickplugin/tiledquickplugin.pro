@@ -39,8 +39,12 @@ ios {
 
 # Input
 SOURCES += \
-    imagemapobject.cpp \
+    drawutils.cpp \
+    grouplayeritem.cpp \
+    imagelayeritem.cpp \
     layeritem.cpp \
+    layerscontainer.cpp \
+    mapobjectitem.cpp \
     objectlayeritem.cpp \
     tiledquickplugin.cpp \
     mapitem.cpp \
@@ -48,8 +52,12 @@ SOURCES += \
     tilelayeritem.cpp
 
 HEADERS += \
-    imagemapobject.h \
+    drawutils.h \
+    grouplayeritem.h \
+    imagelayeritem.h \
     layeritem.h \
+    layerscontainer.h \
+    mapobjectitem.h \
     objectlayeritem.h \
     tiledquickplugin.h \
     mapitem.h \

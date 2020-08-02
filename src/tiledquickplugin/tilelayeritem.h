@@ -30,29 +30,14 @@ class TileLayer;
 
 namespace TiledQuick
 {
-/**
- * A graphical item displaying a tile layer in a Qt Quick scene.
- */
 class TileLayerItem : public LayerItem
 {
     Q_OBJECT
 
 public:
-    /**
-     * Constructor.
-     *
-     * @param layer    the tile layer to be displayed
-     * @param renderer the map renderer to use to render the layer
-     */
-    TileLayerItem(Tiled::TileLayer* layer, Tiled::MapRenderer* renderer, MapItem* parent);
+    TileLayerItem(Tiled::TileLayer* layer, MapItem* mapItem, QQuickItem* parent);
 
 protected:
     void paint(QPainter* painter) override;
-
-private:
-    void updateRect();
-
-private slots:
-    void onVisibilityChanged();
 };
 } // namespace TiledQuick

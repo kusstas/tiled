@@ -17,11 +17,7 @@ class ObjectLayerItem : public LayerItem
     Q_OBJECT
 
 public:
-    ObjectLayerItem(Tiled::ObjectGroup* layer, Tiled::MapRenderer* renderer, MapItem* parent);
-
-private:
-    void onParentWidthChanged();
-    void onParentHeightChanged();
+    ObjectLayerItem(Tiled::ObjectGroup* layer,MapItem* mapItem, QQuickItem* parent);
 };
 }
 

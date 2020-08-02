@@ -32,37 +32,18 @@
 
 namespace TiledQuick
 {
-TileLayerItem::TileLayerItem(Tiled::TileLayer* layer, Tiled::MapRenderer* renderer, MapItem* parent)
-    : LayerItem(layer, renderer, parent)
+TileLayerItem::TileLayerItem(Tiled::TileLayer* layer, MapItem* mapItem, QQuickItem* parent)
+    : LayerItem(layer, mapItem, parent)
 {
-    onVisibilityChanged();
+    auto const rect = renderer()->boundingRect(layer->rect());
+
+    setSize(rect.size());
+
+    update();
 }
 
 void TileLayerItem::paint(QPainter* painter)
 {
-    renderer()->drawTileLayer(painter, layer()->asTileLayer(), visibleArea());
-}
-
-void TileLayerItem::updateRect()
-{
-    QRectF const boundingRect = renderer()->boundingRect(layer()->asTileLayer()->rect());
-    setPosition(boundingRect.topLeft());
-    setSize(boundingRect.size());
-}
-
-void TileLayerItem::onVisibilityChanged()
-{
-    bool const visible = layer()->isVisible();
-    setVisible(visible);
-
-    if (visible)
-    {
-        updateRect();
-        connect(mapItem(), &MapItem::visibleAreaChanged, this, &TileLayerItem::updatePaint);
-    }
-    else
-    {
-        connect(mapItem(), &MapItem::visibleAreaChanged, this, &TileLayerItem::updatePaint);
-    }
+    renderer()->drawTileLayer(painter, layer()->asTileLayer(), QRect());
 }
 }

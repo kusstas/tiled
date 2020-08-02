@@ -2,7 +2,5 @@
     <qresource prefix="/qt-project.org/imports/org/mapeditor/Tiled">
         <file>qmldir</file>
     </qresource>
-    <qresource prefix="/tiledquick_private_qml">
-        <file>TintColorOverlay.qml</file>
-    </qresource>
+    <qresource prefix="/tiledquick_private_qml"/>
 </RCC>

@@ -21,12 +21,16 @@
 #pragma once
 
 #include "mapref.h"
+#include "maprenderer.h"
+
+#include "layerscontainer.h"
 
 #include <QQuickPaintedItem>
+#include <QScopedPointer>
 #include <QSharedPointer>
 #include <QUrl>
 
-#include <memory>
+
 
 namespace Tiled
 {
@@ -47,69 +51,29 @@ class MapItem : public QQuickPaintedItem
     Q_OBJECT
 
     Q_PROPERTY(TiledQuick::MapRef map READ map WRITE setMap RESET unsetMap NOTIFY mapChanged)
-    Q_PROPERTY(QRectF visibleArea READ visibleArea WRITE setVisibleArea NOTIFY visibleAreaChanged)
 
 public:
     explicit MapItem(QQuickItem* parent = nullptr);
-    ~MapItem();
 
     MapRef map() const;
+    Tiled::MapRenderer* renderer() const;
+
     void setMap(MapRef map);
     void unsetMap();
 
-    QRectF const& visibleArea() const;
-    void setVisibleArea(QRectF const& visibleArea);
-
-    QRectF boundingRect() const override;
-
-    Q_INVOKABLE QPointF screenToTileCoords(qreal x, qreal y) const;
-    Q_INVOKABLE QPointF screenToTileCoords(QPointF const& position) const;
-    Q_INVOKABLE QPointF tileToScreenCoords(qreal x, qreal y) const;
-    Q_INVOKABLE QPointF tileToScreenCoords(QPointF const& position) const;
-    Q_INVOKABLE QPointF screenToPixelCoords(qreal x, qreal y) const;
-    Q_INVOKABLE QPointF screenToPixelCoords(QPointF const& position) const;
-    Q_INVOKABLE QPointF pixelToScreenCoords(qreal x, qreal y) const;
-    Q_INVOKABLE QPointF pixelToScreenCoords(QPointF const& position) const;
-    Q_INVOKABLE QPointF pixelToTileCoords(qreal x, qreal y) const;
-    Q_INVOKABLE QPointF pixelToTileCoords(QPointF const& position) const;
-
-    void componentComplete() override;
-
 signals:
     void mapChanged();
-    void visibleAreaChanged();
 
 protected:
+    void componentComplete() override;
     void paint(QPainter* painter) override;
 
 private:
     void refresh();
-    void attachColorOverlay(LayerItem* layer);
 
 private:
-    static QUrl const TINT_COLOR_OVERLAY_URL;
-    static QSharedPointer<QQmlComponent> tintColorOverlayComponent;
-
     Tiled::Map* m_map;
-    QRectF m_visibleArea;
-
-    std::unique_ptr<Tiled::MapRenderer> m_renderer;
-    QList<LayerItem*> m_layerItems;
+    QScopedPointer<Tiled::MapRenderer> m_renderer;
+    LayersContainer m_layersContainer;
 };
-
-inline QRectF const& MapItem::visibleArea() const
-{
-    return m_visibleArea;
-}
-
-inline MapRef MapItem::map() const
-{
-    return m_map;
-}
-
-inline void MapItem::unsetMap()
-{
-    setMap(nullptr);
-}
-
 } // namespace TiledQuick

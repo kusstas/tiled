@@ -9,15 +9,14 @@
 
 namespace TiledQuick
 {
-LayerItem::LayerItem(Tiled::Layer* layer, Tiled::MapRenderer* renderer, MapItem* parent)
+LayerItem::LayerItem(Tiled::Layer* layer, MapItem* mapItem, QQuickItem* parent)
     : QQuickPaintedItem(parent)
     , m_layer(layer)
-    , m_renderer(renderer)
+    , m_mapItem(mapItem)
 {
     setObjectName(layer->name());
     setParentItem(parent);
-    setX(layer->totalOffset().x());
-    setY(layer->totalOffset().y());
+    setPosition(layer->totalOffset());
     setOpacity(layer->opacity());
     setVisible(layer->isVisible());
 }
@@ -34,17 +33,17 @@ Tiled::Layer* LayerItem::layer() const
 
 Tiled::MapRenderer* LayerItem::renderer() const
 {
-    return m_renderer;
+    return mapItem()->renderer();
 }
 
 MapItem* LayerItem::mapItem() const
 {
-    return static_cast<MapItem*>(parent());
+    return m_mapItem;
 }
 
-QRectF LayerItem::visibleArea() const
+QQmlEngine* LayerItem::qqmlEngine() const
 {
-    return mapItem()->visibleArea();
+    return qmlEngine(mapItem());
 }
 
 void LayerItem::updatePaint()

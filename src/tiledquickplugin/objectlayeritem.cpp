@@ -4,38 +4,18 @@
 #include "mapobject.h"
 #include "map.h"
 
-#include "imagemapobject.h"
+#include "mapobjectitem.h"
 #include "mapitem.h"
 
 
 namespace TiledQuick
 {
-ObjectLayerItem::ObjectLayerItem(Tiled::ObjectGroup* layer, Tiled::MapRenderer* renderer, TiledQuick::MapItem* parent)
-    : LayerItem(layer, renderer, parent)
+ObjectLayerItem::ObjectLayerItem(Tiled::ObjectGroup* layer, MapItem* mapItem, QQuickItem* parent)
+    : LayerItem(layer, mapItem, parent)
 {
     for (auto obj : layer->objects())
     {
-        if (!obj->cell().isEmpty())
-        {
-            new ImageMapObject(obj, this); // child, controled by qt parent system
-        }
+        new MapObjectItem(obj, this); // child, controled by qt parent system
     }
-
-    onParentWidthChanged();
-    onParentHeightChanged();
-
-    connect(parentItem(), &QQuickItem::widthChanged, this, &ObjectLayerItem::onParentWidthChanged);
-    connect(parentItem(), &QQuickItem::heightChanged, this, &ObjectLayerItem::onParentHeightChanged);
-}
-
-
-void ObjectLayerItem::onParentWidthChanged()
-{
-    setWidth(parentItem()->width());
-}
-
-void ObjectLayerItem::onParentHeightChanged()
-{
-    setHeight(parentItem()->height());
 }
 }

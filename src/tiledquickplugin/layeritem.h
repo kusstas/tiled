@@ -20,13 +20,13 @@ class LayerItem : public QQuickPaintedItem
     Q_PROPERTY(QColor tintColor READ tintColor CONSTANT)
 
 public:
-    LayerItem(Tiled::Layer* layer, Tiled::MapRenderer* renderer, MapItem* parent);
+    LayerItem(Tiled::Layer* layer, MapItem* mapItem, QQuickItem* parent);
 
     QColor const& tintColor() const;
     Tiled::Layer* layer() const;
     Tiled::MapRenderer* renderer() const;
     MapItem* mapItem() const;
-    QRectF visibleArea() const;
+    QQmlEngine* qqmlEngine() const;
 
 protected:
     void updatePaint();
@@ -34,7 +34,7 @@ protected:
 
 private:
     Tiled::Layer* m_layer;
-    Tiled::MapRenderer* m_renderer;
+    MapItem* m_mapItem;
 };
 }
 
