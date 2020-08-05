@@ -213,13 +213,21 @@
   <objectgroup id="3" name="Objects" offsetx="-2" offsety="0">
    <object id="1" name="maggots" type="location" x="435" y="74" width="155" height="99">
     <properties>
+     <property name="drawDebug" type="bool" value="true"/>
+     <property name="onClick" value="console.log(&quot;click&quot;, obj.objectName)"/>
+     <property name="onPress" value="console.log(&quot;press&quot;, obj.objectName)"/>
+     <property name="onRelease" value="console.log(&quot;release&quot;, obj.objectName)"/>
+     <property name="pressByShape" type="bool" value="true"/>
      <property name="spawncount" type="int" value="5"/>
      <property name="spawntype" value="maggot"/>
     </properties>
    </object>
    <object id="2" name="discover chest" type="trigger" x="201" y="200" width="127" height="127">
     <properties>
-     <property name="script" value="chest-discovered.lua"/>
+     <property name="drawDebug" type="bool" value="true"/>
+     <property name="onClick">console.log(obj.objectName)
+console.log(engine.findMapObject(&quot;Group 1.Objects.player-start&quot;))</property>
+     <property name="pressByShape" type="bool" value="true"/>
     </properties>
     <ellipse/>
    </object>
@@ -231,12 +239,29 @@
     <polygon points="0,0 55,-23 96,-117 110,-61 104,-42 119,-33 116,6 104,9 100,36 60,43 53,58 43,58 34,74 21,69 18,90 0,89"/>
    </object>
    <object id="5" name="guard" type="NPC" x="22" y="361">
+    <properties>
+     <property name="drawDebug" type="bool" value="true"/>
+     <property name="pressByShape" type="bool" value="false"/>
+    </properties>
     <polyline points="-3,120 87,91 154,96 181,16 273,-1"/>
    </object>
-   <object id="6" name="guard" type="NPC" x="277" y="18">
+   <object id="6" name="guard1" type="NPC" x="277" y="18">
+    <properties>
+     <property name="drawDebug" type="bool" value="true"/>
+     <property name="onClick" value="console.log(&quot;click&quot;, obj.objectName)"/>
+     <property name="onPress" value="console.log(&quot;press&quot;, obj.objectName)"/>
+     <property name="onRelease" value="console.log(&quot;release&quot;, obj.objectName)"/>
+     <property name="pressByShape" type="bool" value="true"/>
+    </properties>
     <polyline points="0,0 75,78 133,82 176,179 274,183"/>
    </object>
-   <object id="10" gid="282" x="413.333" y="225.333" width="16" height="16"/>
+   <object id="10" name="test" gid="282" x="413.333" y="225.333" width="16" height="16">
+    <properties>
+     <property name="drawDebug" type="bool" value="true"/>
+     <property name="onClick">var path = engine.findMapObject(&quot;Group 1.Objects.guard&quot;)
+engine.startObjectPath(obj, path, [200, 200, 200, 200])</property>
+    </properties>
+   </object>
    <object id="11" gid="282" x="421.667" y="218" width="16" height="16"/>
    <object id="12" gid="2147483930" x="423" y="235.333" width="16" height="16"/>
    <object id="13" gid="282" x="5" y="70" width="16" height="16"/>

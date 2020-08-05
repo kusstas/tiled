@@ -12,8 +12,10 @@ namespace TiledQuick
 {
 class ImageLayerItem : public LayerItem
 {
+    Q_OBJECT
+
 public:
-    ImageLayerItem(Tiled::ImageLayer* layer, MapItem* mapItem, QQuickItem* parent);
+    ImageLayerItem(Tiled::ImageLayer* layer, TiledItem* parent);
 
 protected:
     void paint(QPainter* painter) override;

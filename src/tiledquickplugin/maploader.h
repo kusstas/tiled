@@ -1,31 +1,9 @@
-/*
- * maploader.h
- * Copyright 2015, Thorbjørn Lindeijer <bjorn@lindeijer.nl>
- *
- * This file is part of Tiled Quick.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
 
 #include "mapref.h"
 
 #include <QObject>
 #include <QUrl>
-
-#include <memory>
 
 
 namespace TiledQuick
@@ -49,47 +27,25 @@ public:
     Q_ENUM(Status)
 
     explicit MapLoader(QObject* parent = nullptr);
-    ~MapLoader();
 
-    QUrl source() const;
-    MapRef map() const;
+    QUrl const& source() const;
+    MapRef const& map() const;
+    QString const& error() const;
     Status status() const;
-    QString error() const;
-
-signals:
-    void sourceChanged(QUrl const& source);
-    void mapChanged(Tiled::Map* map);
-    void statusChanged(Status status);
-    void errorChanged(QString const& error);
 
 public slots:
     void setSource(QUrl const& source);
 
+signals:
+    void sourceChanged(QUrl const& source);
+    void mapChanged(MapRef const& map);
+    void statusChanged(Status status);
+    void errorChanged(QString const& error);
+
 private:
     QUrl m_source;
-    std::unique_ptr<Tiled::Map> m_map;
+    MapRef m_map;
     Status m_status;
     QString m_error;
 };
-
-
-inline MapRef MapLoader::map() const
-{
-    return m_map.get();
-}
-
-inline MapLoader::Status MapLoader::status() const
-{
-    return m_status;
-}
-
-inline QString MapLoader::error() const
-{
-    return m_error;
-}
-
-inline QUrl MapLoader::source() const
-{
-    return m_source;
-}
 } // namespace TiledQuick

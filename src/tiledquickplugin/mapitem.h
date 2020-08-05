@@ -1,79 +1,36 @@
-/*
- * mapitem.h
- * Copyright 2014, Thorbjørn Lindeijer <bjorn@lindeijer.nl>
- *
- * This file is part of Tiled Quick.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
 
-#include "mapref.h"
-#include "maprenderer.h"
+#include "tileditem.h"
 
+#include "map.h"
+#include "maprenderer.h"
+#include "scriptengine.h"
 #include "layerscontainer.h"
 
-#include <QQuickPaintedItem>
-#include <QScopedPointer>
 #include <QSharedPointer>
-#include <QUrl>
+#include <QScopedPointer>
 
-
-
-namespace Tiled
-{
-class MapRenderer;
-} // namespace Tiled
 
 namespace TiledQuick
 {
-class LayerItem;
-class TileLayerItem;
-class ObjectLayerItem;
-
-/**
- * A declarative item that displays a map.
- */
-class MapItem : public QQuickPaintedItem
+class MapItem : public TiledItem
 {
     Q_OBJECT
 
-    Q_PROPERTY(TiledQuick::MapRef map READ map WRITE setMap RESET unsetMap NOTIFY mapChanged)
-
 public:
-    explicit MapItem(QQuickItem* parent = nullptr);
+    MapItem(QSharedPointer<Tiled::Map> const& map, QSharedPointer<Tiled::MapRenderer> const& renderer, QQuickItem* parent);
 
-    MapRef map() const;
-    Tiled::MapRenderer* renderer() const;
+    Tiled::Map* map() override;
+    Tiled::MapRenderer* renderer() override;
+    ScriptEngine* scriptEngine() override;
+    QQmlEngine* qqmlEngine() override;
 
-    void setMap(MapRef map);
-    void unsetMap();
-
-signals:
-    void mapChanged();
-
-protected:
-    void componentComplete() override;
-    void paint(QPainter* painter) override;
+    void start() override;
 
 private:
-    void refresh();
-
-private:
-    Tiled::Map* m_map;
-    QScopedPointer<Tiled::MapRenderer> m_renderer;
-    LayersContainer m_layersContainer;
+    QSharedPointer<Tiled::Map> m_map;
+    QSharedPointer<Tiled::MapRenderer> m_renderer;
+    QScopedPointer<LayersContainer> m_layersContainer;
+    ScriptEngine m_scriptEngine;
 };
 } // namespace TiledQuick

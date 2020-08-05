@@ -40,29 +40,42 @@ ios {
 # Input
 SOURCES += \
     drawutils.cpp \
+    ellipsepathanimation.cpp \
     grouplayeritem.cpp \
     imagelayeritem.cpp \
     layeritem.cpp \
     layerscontainer.cpp \
     mapobjectitem.cpp \
+    mapviewport.cpp \
     objectlayeritem.cpp \
+    pathanimation.cpp \
+    polygonpathanimation.cpp \
+    scriptengine.cpp \
+    tileditem.cpp \
     tiledquickplugin.cpp \
     mapitem.cpp \
     maploader.cpp \
     tilelayeritem.cpp
 
 HEADERS += \
+    customattributes.h \
     drawutils.h \
+    ellipsepathanimation.h \
     grouplayeritem.h \
     imagelayeritem.h \
     layeritem.h \
     layerscontainer.h \
     mapobjectitem.h \
+    mapref.h \
+    mapviewport.h \
     objectlayeritem.h \
+    pathanimation.h \
+    polygonpathanimation.h \
+    scriptengine.h \
+    tileditem.h \
     tiledquickplugin.h \
     mapitem.h \
     maploader.h \
-    mapref.h \
     tilelayeritem.h
 
 OTHER_FILES = qmldir

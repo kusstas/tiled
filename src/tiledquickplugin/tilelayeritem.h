@@ -35,7 +35,7 @@ class TileLayerItem : public LayerItem
     Q_OBJECT
 
 public:
-    TileLayerItem(Tiled::TileLayer* layer, MapItem* mapItem, QQuickItem* parent);
+    TileLayerItem(Tiled::TileLayer* layer, TiledItem* parent);
 
 protected:
     void paint(QPainter* painter) override;

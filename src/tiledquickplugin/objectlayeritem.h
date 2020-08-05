@@ -17,7 +17,9 @@ class ObjectLayerItem : public LayerItem
     Q_OBJECT
 
 public:
-    ObjectLayerItem(Tiled::ObjectGroup* layer,MapItem* mapItem, QQuickItem* parent);
+    ObjectLayerItem(Tiled::ObjectGroup* layer, TiledItem* parent);
+
+    void start() override;
 };
 }
 

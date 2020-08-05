@@ -1,51 +1,44 @@
 #include "mapobjectitem.h"
 #include "objectlayeritem.h"
+#include "customattributes.h"
 #include "drawutils.h"
 
-#include <QQuickItem>
 #include <QQmlEngine>
 #include <QTransform>
 
 
 namespace TiledQuick
 {
-constexpr auto ON_PRESS_CALLBACK_NAME = "onPress";
-constexpr auto ON_CLICK_CALLBACK_NAME = "onClick";
-constexpr auto ON_RELEASE_CALLBACK_NAME = "onRelease";
-constexpr auto DRAW_DEBUG_NAME = "drawDebug";
-constexpr auto PRESS_BY_SHAPE_NAME = "pressByShape";
-constexpr auto PRESS_GUARD_NAME = "pressGuard";
-QString const JS_CALLBACK_FORMAT = "(function(obj) { %1 })";
 QColor const DEBUG_PEN_COLOR = Qt::red;
 int const DEBUG_PEN_WIDTH = 6;
 int const DEBUG_POINT_WIDTH = 15;
 
 MapObjectItem::MapObjectItem(Tiled::MapObject* mapObject, ObjectLayerItem* parent)
-    : QQuickPaintedItem(parent)
-    , m_mapObject(mapObject)
+    : TiledItem(mapObject, parent)
     , m_drawDebug(false)
     , m_pressByShape(false)
-    , m_pressGuard(false)
+    , m_clikable(false)
     , m_pressed(false)
 {
     transformPolygon();
 
     setObjectName(mapObject->name());
-    setParentItem(parent);
     setSize(mapObject->hasDimensions() ? mapObject->size() : mapObject->polygon().boundingRect().size());
     setTransformOrigin(convert(mapObject->alignment(mapObject->map())));
     setPosition(convertCoordinates(mapObject->bounds(), mapObject->alignment()));
     setRotation(mapObject->rotation());
     setVisible(mapObject->isVisible());
 
-    m_onPressCallback = compileCallback(ON_PRESS_CALLBACK_NAME);
-    m_onReleaseCallback = compileCallback(ON_RELEASE_CALLBACK_NAME);
-    m_onClickCallback = compileCallback(ON_CLICK_CALLBACK_NAME);
+    validateObjectName();
+
+    m_pressCallback = compileCallback(PRESS_CALLBACK_NAME);
+    m_releaseCallback = compileCallback(RELEASE_CALLBACK_NAME);
+    m_clickCallback = compileCallback(CLICK_CALLBACK_NAME);
     m_drawDebug = mapObject->properties().value(DRAW_DEBUG_NAME, m_drawDebug).toBool();
     m_pressByShape = mapObject->properties().value(PRESS_BY_SHAPE_NAME, m_pressByShape).toBool();
-    m_pressGuard = mapObject->properties().value(PRESS_GUARD_NAME, m_pressGuard).toBool();
+    m_clikable = mapObject->properties().value(CLICKABLE_NAME, m_clikable).toBool();
 
-    if (clickable())
+    if (m_clikable)
     {
         setAcceptedMouseButtons(Qt::AllButtons);
     }
@@ -58,7 +51,7 @@ ObjectLayerItem* MapObjectItem::objectLayer() const
 
 Tiled::MapObject* MapObjectItem::mapObject() const
 {
-    return m_mapObject;
+    return object<Tiled::MapObject>();
 }
 
 QPointF MapObjectItem::convertCoordinates(QRectF const& rect, Tiled::Alignment origin)
@@ -133,7 +126,7 @@ QQuickItem::TransformOrigin MapObjectItem::convert(Tiled::Alignment origin)
     case Tiled::Center:
         return QQuickItem::Center;
     case Tiled::Right:
-        return QQuickItem::Right;;
+        return QQuickItem::Right;
     case Tiled::BottomLeft:
         return QQuickItem::BottomLeft;
     case Tiled::Bottom:
@@ -166,7 +159,7 @@ void MapObjectItem::paint(QPainter* painter)
         QRect const target(0, 0, width(), height());
         QRect const source(0, 0, pixmap.width(), pixmap.height());
 
-        DrawUtils::paintPixmap(painter, target, source, pixmap, objectLayer()->tintColor());
+        DrawUtils::paintPixmap(painter, target, source, pixmap, objectLayer()->layer()->tintColor());
     }
 
     if (m_drawDebug)
@@ -186,7 +179,7 @@ void MapObjectItem::mousePressEvent(QMouseEvent* event)
     m_pressed = true;
 
     event->accept();
-    invokeCallback(m_onPressCallback, ON_PRESS_CALLBACK_NAME);
+    invokeCallback(m_pressCallback);
 }
 
 void MapObjectItem::mouseReleaseEvent(QMouseEvent* event)
@@ -201,11 +194,11 @@ void MapObjectItem::mouseReleaseEvent(QMouseEvent* event)
 
 
     event->accept();
-    invokeCallback(m_onReleaseCallback, ON_RELEASE_CALLBACK_NAME);
+    invokeCallback(m_releaseCallback);
 
     if (containsPoint(event->pos()))
     {
-        invokeCallback(m_onClickCallback, ON_CLICK_CALLBACK_NAME);
+        invokeCallback(m_clickCallback);
     }
 }
 
@@ -260,16 +253,12 @@ void MapObjectItem::drawDebug(QPainter* painter)
         break;
     case Tiled::MapObject::Polyline:
         painter->drawPolyline(mapObject()->polygon());
+        painter->setPen(penPoint);
+        painter->drawPoint(mapObject()->polygon().first());
         break;
     case Tiled::MapObject::Point:
         break;
-        break;
     }
-}
-
-bool MapObjectItem::clickable() const
-{
-    return m_onPressCallback.isCallable() || m_onReleaseCallback.isCallable() || m_onClickCallback.isCallable() || m_pressGuard;
 }
 
 bool MapObjectItem::containsPoint(QPointF const& localPos) const
@@ -300,46 +289,5 @@ bool MapObjectItem::containsPoint(QPointF const& localPos) const
 bool MapObjectItem::containsPointInBoundingRect(QPointF const& localPos) const
 {
     return QRectF(0, 0, width(), height()).contains(localPos);
-}
-
-QJSValue MapObjectItem::compileCallback(QString const& name)
-{
-    auto const value = mapObject()->properties().value(name);
-
-    if (!value.isValid())
-    {
-        return {};
-    }
-
-    if (value.type() != QVariant::String)
-    {
-        qCritical() << "Callback:" << name << "should be string! Object:" << objectName();
-        return {};
-    }
-
-    auto const jsValue = objectLayer()->qqmlEngine()->evaluate(JS_CALLBACK_FORMAT.arg(value.toString()));
-
-    if (jsValue.isError())
-    {
-        qCritical() << "Can't compile callback:" << name << "object:" << objectName() << jsValue.toString();
-        return {};
-    }
-
-    return jsValue;
-}
-
-void MapObjectItem::invokeCallback(QJSValue& callback, QString const& name)
-{
-    if (!callback.isCallable())
-    {
-        return;
-    }
-
-    auto const result = callback.call({objectLayer()->qqmlEngine()->toScriptValue(this)});
-
-    if (result.isError())
-    {
-        qCritical() << "Can't compile callback:" << name << "object:" << objectName() << result.toString();
-    }
 }
 }

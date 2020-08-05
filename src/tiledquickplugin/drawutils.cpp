@@ -2,6 +2,11 @@
 
 #include <cmath>
 
+
+namespace TiledQuick
+{
+constexpr auto DEGRESS_IN_PI = 180;
+
 void TiledQuick::DrawUtils::paintPixmap(QPainter* painter, QRect const& target, QRect const& source, QPixmap const& pixmap, QColor const& tint)
 {
     auto const prevMode = painter->compositionMode();
@@ -25,7 +30,7 @@ void TiledQuick::DrawUtils::paintPixmap(QPainter* painter, QRect const& target, 
 
 QPointF TiledQuick::DrawUtils::rotate(QPointF const& pivot, QPointF const& target, qreal angle)
 {
-    qreal const p = (angle / 180) * M_PI;
+    qreal const p = (angle / DEGRESS_IN_PI) * M_PI;
 
     qreal s = std::sin(p);
     qreal c = std::cos(p);
@@ -44,7 +49,8 @@ qreal TiledQuick::DrawUtils::angle(QVector2D const& v1, QVector2D const& v2)
     qreal dot = QVector2D::dotProduct(v1, v2);
     dot = ( dot < -1.0 ? -1.0 : ( dot > 1.0 ? 1.0 : dot ) );
 
-    qreal angle = (std::acos( dot ) / M_PI) * 180;
+    qreal angle = (std::acos( dot ) / M_PI) * DEGRESS_IN_PI;
 
     return angle;
+}
 }

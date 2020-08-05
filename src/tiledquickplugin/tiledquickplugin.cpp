@@ -22,15 +22,18 @@
 
 #include "map.h"
 #include "mapobject.h"
-#include "objectgroup.h"
 
-#include "mapitem.h"
+#include "tileditem.h"
+#include "mapobjectitem.h"
+#include "pathanimation.h"
+
 #include "maploader.h"
+#include "mapviewport.h"
 
 #include <qqml.h>
 
-using namespace TiledQuick;
 
+using namespace TiledQuick;
 
 TiledQuickPlugin::TiledQuickPlugin()
 {
@@ -41,7 +44,11 @@ void TiledQuickPlugin::registerTypes(char const* uri)
 {
     // @uri org.mapeditor.Tiled
 
+    qRegisterMetaType<TiledItem*>("TiledQuick::TiledItem*");
+    qRegisterMetaType<MapObjectItem*>("TiledQuick::MapObjectItem*");
+    qRegisterMetaType<PathAnimation*>("TiledQuick::PathAnimation*");
+
     qmlRegisterAnonymousType<MapRef>(uri, 1);
     qmlRegisterType<MapLoader>(uri, 1, 0, "MapLoader");
-    qmlRegisterType<MapItem>(uri, 1, 0, "MapItem");
+    qmlRegisterType<MapViewport>(uri, 1, 0, "MapViewport");
 }

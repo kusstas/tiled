@@ -1,23 +1,3 @@
-/*
- * maploader.cpp
- * Copyright 2015, Thorbjørn Lindeijer <bjorn@lindeijer.nl>
- *
- * This file is part of Tiled Quick.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include "maploader.h"
 
 #include "map.h"
@@ -25,17 +5,33 @@
 #include "tiled.h"
 #include "tileset.h"
 
-using namespace TiledQuick;
 
+namespace TiledQuick
+{
 MapLoader::MapLoader(QObject* parent)
     : QObject(parent)
-    , m_map(nullptr)
     , m_status(Null)
 {
 }
 
-MapLoader::~MapLoader()
+QUrl const& MapLoader::source() const
 {
+    return m_source;
+}
+
+MapRef const& MapLoader::map() const
+{
+    return m_map;
+}
+
+QString const& MapLoader::error() const
+{
+    return m_error;
+}
+
+MapLoader::Status MapLoader::status() const
+{
+    return m_status;
 }
 
 void MapLoader::setSource(QUrl const& source)
@@ -49,15 +45,15 @@ void MapLoader::setSource(QUrl const& source)
 
     Tiled::MapReader mapReader;
 
-    std::unique_ptr<Tiled::Map> map(mapReader.readMap(Tiled::urlToLocalFileOrQrc(source)));
+    Tiled::Map* map = mapReader.readMap(Tiled::urlToLocalFileOrQrc(source)).release();
     Status status = map ? Ready : Error;
     QString error = map ? QString() : mapReader.errorString();
 
-    bool const mapDiff = m_map != map;
+    bool const mapDiff = m_map.get() != map;
     bool const statusDiff = m_status != status;
     bool const errorDiff = m_error != error;
 
-    m_map = std::move(map);
+    m_map.reset(map);
     m_status = status;
     m_error = error;
 
@@ -65,7 +61,7 @@ void MapLoader::setSource(QUrl const& source)
 
     if (mapDiff)
     {
-        emit mapChanged(m_map.get());
+        emit mapChanged(m_map);
     }
     if (statusDiff)
     {
@@ -75,4 +71,5 @@ void MapLoader::setSource(QUrl const& source)
     {
         emit errorChanged(error);
     }
+}
 }

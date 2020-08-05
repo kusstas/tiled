@@ -11,13 +11,14 @@ class GroupLayer;
 
 namespace TiledQuick
 {
-class GroupLayerItem : public LayerItem
+class GroupLayerItem : public LayerItem, public LayersContainer
 {
-public:
-    GroupLayerItem(Tiled::GroupLayer* layer, MapItem* mapItem, QQuickItem* parent);
+    Q_OBJECT
 
-private:
-    LayersContainer m_layersContainer;
+public:
+    GroupLayerItem(Tiled::GroupLayer* layer, TiledItem* parent);
+
+    void start() override;
 };
 }
 

@@ -23,23 +23,17 @@
 #include "map.h"
 #include "maprenderer.h"
 #include "tilelayer.h"
-
 #include "mapitem.h"
 
-#include <QtMath>
-#include <QQuickWindow>
+#include <QPainter>
 
 
 namespace TiledQuick
 {
-TileLayerItem::TileLayerItem(Tiled::TileLayer* layer, MapItem* mapItem, QQuickItem* parent)
-    : LayerItem(layer, mapItem, parent)
+TileLayerItem::TileLayerItem(Tiled::TileLayer* layer, TiledItem* parent)
+    : LayerItem(layer, parent)
 {
-    auto const rect = renderer()->boundingRect(layer->rect());
-
-    setSize(rect.size());
-
-    update();
+    setSize(renderer()->boundingRect(layer->rect()).size());
 }
 
 void TileLayerItem::paint(QPainter* painter)

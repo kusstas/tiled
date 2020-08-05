@@ -5,36 +5,13 @@
 #include "grouplayeritem.h"
 #include "imagelayeritem.h"
 
-#include "map.h"
-#include "hexagonalrenderer.h"
-#include "isometricrenderer.h"
-#include "orthogonalrenderer.h"
-#include "staggeredrenderer.h"
 #include "tilelayer.h"
-
-#include <QQmlContext>
-#include <QQmlEngine>
-#include <QQmlComponent>
 
 
 namespace TiledQuick
 {
-LayersContainer::LayersContainer(QQuickItem* parentItem, MapItem* mapItem)
-    : m_parentItem(parentItem)
-    , m_mapItem(mapItem)
+LayersContainer::LayersContainer(QList<Tiled::Layer*> const& layers, TiledItem* parent)
 {
-}
-
-LayersContainer::~LayersContainer()
-{
-    qDeleteAll(m_layerItems);
-}
-
-void LayersContainer::create(QList<Tiled::Layer*> const& layers)
-{
-    qDeleteAll(m_layerItems);
-    m_layerItems.clear();
-
     for (Tiled::Layer* layer : layers)
     {
         LayerItem* layerItem = nullptr;
@@ -42,16 +19,16 @@ void LayersContainer::create(QList<Tiled::Layer*> const& layers)
         switch (layer->layerType())
         {
         case Tiled::Layer::TileLayerType:
-            layerItem = new TileLayerItem(layer->asTileLayer(), m_mapItem, m_parentItem);
+            layerItem = new TileLayerItem(layer->asTileLayer(), parent);
             break;
         case Tiled::Layer::ObjectGroupType:
-            layerItem = new ObjectLayerItem(layer->asObjectGroup(), m_mapItem, m_parentItem);
+            layerItem = new ObjectLayerItem(layer->asObjectGroup(), parent);
             break;
         case Tiled::Layer::ImageLayerType:
-            layerItem = new ImageLayerItem(layer->asImageLayer(), m_mapItem, m_parentItem);
+            layerItem = new ImageLayerItem(layer->asImageLayer(), parent);
             break;
         case Tiled::Layer::GroupLayerType:
-            layerItem = new GroupLayerItem(layer->asGroupLayer(), m_mapItem, m_parentItem);
+            layerItem = new GroupLayerItem(layer->asGroupLayer(), parent);
             break;
         }
 
@@ -61,6 +38,20 @@ void LayersContainer::create(QList<Tiled::Layer*> const& layers)
         }
 
         m_layerItems.append(layerItem);
+    }
+}
+
+
+LayersContainer::~LayersContainer()
+{
+    qDeleteAll(m_layerItems);
+}
+
+void LayersContainer::start()
+{
+    for (auto layer : m_layerItems)
+    {
+        layer->start();
     }
 }
 }

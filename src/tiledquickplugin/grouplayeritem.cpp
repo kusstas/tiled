@@ -1,14 +1,18 @@
 #include "grouplayeritem.h"
-
 #include "grouplayer.h"
 
 
 namespace TiledQuick
 {
-GroupLayerItem::GroupLayerItem(Tiled::GroupLayer* layer, TiledQuick::MapItem* mapItem, QQuickItem* parent)
-    : LayerItem(layer, mapItem, parent)
-    , m_layersContainer(this, mapItem)
+GroupLayerItem::GroupLayerItem(Tiled::GroupLayer* layer, TiledItem* parent)
+    : LayerItem(layer, parent)
+    , LayersContainer(layer->layers(), this)
 {
-    m_layersContainer.create(layer->layers());
+}
+
+void GroupLayerItem::start()
+{
+    TiledItem::start();
+    LayersContainer::start();
 }
 }

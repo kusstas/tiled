@@ -1,12 +1,8 @@
 #pragma once
 
 #include "mapobject.h"
+#include "tileditem.h"
 
-#include <QQuickPaintedItem>
-#include <QJSValue>
-
-
-class QQuickItem;
 
 namespace Tiled
 {
@@ -17,8 +13,10 @@ namespace TiledQuick
 {
 class ObjectLayerItem;
 
-class MapObjectItem : public QQuickPaintedItem
+class MapObjectItem : public TiledItem
 {
+    Q_OBJECT
+
 public:
     MapObjectItem(Tiled::MapObject* mapObject, ObjectLayerItem* parent);
 
@@ -37,21 +35,16 @@ private:
     void transformPolygon();
     void drawDebug(QPainter* painter);
 
-    bool clickable() const;
     bool containsPoint(QPointF const& localPos) const;
     bool containsPointInBoundingRect(QPointF const& localPos) const;
 
-    QJSValue compileCallback(QString const& name);
-    void invokeCallback(QJSValue& callback, QString const& name);
-
 private:
-    Tiled::MapObject* m_mapObject;
-    QJSValue m_onPressCallback;
-    QJSValue m_onReleaseCallback;
-    QJSValue m_onClickCallback;
+    Callback m_pressCallback;
+    Callback m_releaseCallback;
+    Callback m_clickCallback;
     bool m_drawDebug;
     bool m_pressByShape;
-    bool m_pressGuard;
+    bool m_clikable;
     bool m_pressed;
 };
 }

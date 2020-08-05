@@ -1,13 +1,12 @@
 #include "imagelayeritem.h"
-
 #include "imagelayer.h"
 #include "drawutils.h"
 
 
 namespace TiledQuick
 {
-ImageLayerItem::ImageLayerItem(Tiled::ImageLayer* layer, TiledQuick::MapItem* mapItem, QQuickItem* parent)
-    : LayerItem(layer, mapItem, parent)
+ImageLayerItem::ImageLayerItem(Tiled::ImageLayer* layer, TiledItem* parent)
+    : LayerItem(layer, parent)
 {
     setSize(layer->image().size());
 }
