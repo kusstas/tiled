@@ -31,6 +31,7 @@ protected:
 
 private:
     void refresh();
+    void updateScale();
 
 private:
     MapRef m_map;

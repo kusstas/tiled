@@ -8,9 +8,14 @@
 
 namespace TiledQuick
 {
+constexpr auto ANCHORS_PROPERTY = "anchors";
+constexpr auto CENTER_IN_PROPERTY = "centerIn";
+
 MapViewport::MapViewport(QQuickItem* parent)
     : QQuickItem(parent)
 {
+    connect(this, &QQuickItem::widthChanged, this, &MapViewport::updateScale);
+    connect(this, &QQuickItem::heightChanged, this, &MapViewport::updateScale);
 }
 
 MapRef const& MapViewport::map() const
@@ -73,6 +78,28 @@ void MapViewport::refresh()
     }
 
     m_mapItem.reset(new MapItem(m_map, m_renderer, this));
+
+    auto const anchors = m_mapItem->property(ANCHORS_PROPERTY).value<QObject*>();
+    anchors->setProperty(CENTER_IN_PROPERTY, QVariant::fromValue(this));
+    updateScale();
+
     m_mapItem->start();
+}
+
+void MapViewport::updateScale()
+{
+    if (!m_mapItem)
+    {
+        return;
+    }
+
+    if (width() / m_mapItem->width() > height() / m_mapItem->height())
+    {
+        m_mapItem->setScale(height() / m_mapItem->height());
+    }
+    else
+    {
+        m_mapItem->setScale(width() / m_mapItem->width());
+    }
 }
 }
