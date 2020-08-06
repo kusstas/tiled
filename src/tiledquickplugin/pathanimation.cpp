@@ -186,6 +186,7 @@ void PathAnimation::finishLoop()
 
     if (m_loops > Infinite && m_loops >= m_passedLoops)
     {
+        emit reached();
         stop();
     }
 }

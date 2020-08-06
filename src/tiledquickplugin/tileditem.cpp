@@ -4,12 +4,15 @@
 #include "object.h"
 
 #include <QQmlEngine>
+#include <QStringBuilder>
 
 
 namespace TiledQuick
 {
 QString const TiledItem::OBJECT_PATH_DELIM = ".";
-QString const TiledItem::JS_CALLBACK_FORMAT = "(function(object, engine) { %1 })";
+QString const TiledItem::JS_CALLBACK_FORMAT = "(function(%1) { %2 })";
+QStringList const TiledItem::JS_DEFAULT_PARAMS = {"object", "engine"};
+constexpr auto PARAMS_JOIN = ",";
 
 TiledItem::TiledItem(Tiled::Object* object, TiledItem* parent)
     : TiledItem(object, parent, parent)
@@ -32,6 +35,11 @@ TiledItem::~TiledItem()
     invokeCallback(m_destroyCallback);
 }
 
+TiledItem* TiledItem::parentTiledItem() const
+{
+    return qobject_cast<TiledItem*>(parentItem());
+}
+
 Tiled::Object* TiledItem::object() const
 {
     return m_object;
@@ -40,6 +48,11 @@ Tiled::Object* TiledItem::object() const
 TiledItem* TiledItem::provider() const
 {
     return m_provider;
+}
+
+bool TiledItem::isProvider() const
+{
+    return m_provider == this;
 }
 
 Tiled::Map* TiledItem::map()
@@ -62,6 +75,16 @@ QQmlEngine* TiledItem::qqmlEngine()
     return m_provider->qqmlEngine();
 }
 
+QString TiledItem::objectNamePath() const
+{
+    if (isProvider() || parentTiledItem()->isProvider())
+    {
+        return objectName();
+    }
+
+    return parentTiledItem()->objectNamePath() % OBJECT_PATH_DELIM % objectName();
+}
+
 void TiledItem::start()
 {
     invokeCallback(m_startCallback);
@@ -71,7 +94,31 @@ void TiledItem::paint(QPainter* /*painter*/)
 {
 }
 
-Callback TiledItem::compileCallback(QString const& name)
+Callback TiledItem::compileCallback(QString const& name, QStringList const& params)
+{
+    QStringList allParams = JS_DEFAULT_PARAMS;
+    allParams.append(params);
+
+    return compileCommonCallback(name, allParams);
+}
+
+void TiledItem::invokeCallback(Callback& callback, QVariantList const& params)
+{
+    QVariantList allParams = {QVariant::fromValue(this), QVariant::fromValue(scriptEngine())};
+    allParams.append(params);
+
+    return invokeCommonCallback(callback, allParams);
+}
+
+void TiledItem::validateObjectName()
+{
+    if (objectName().contains(OBJECT_PATH_DELIM))
+    {
+        qWarning() << "Object name:" << objectName() << "should not contains: \"" << OBJECT_PATH_DELIM << "\"";
+    }
+}
+
+Callback TiledItem::compileCommonCallback(QString const& name, QStringList const& params)
 {
     auto const value = object()->properties().value(name);
 
@@ -86,7 +133,8 @@ Callback TiledItem::compileCallback(QString const& name)
         return {};
     }
 
-    auto const jsValue = qqmlEngine()->evaluate(JS_CALLBACK_FORMAT.arg(value.toString()));
+    auto const jsParams = params.join(PARAMS_JOIN);
+    auto const jsValue = qqmlEngine()->evaluate(JS_CALLBACK_FORMAT.arg(jsParams, value.toString()));
 
     if (jsValue.isError())
     {
@@ -97,26 +145,26 @@ Callback TiledItem::compileCallback(QString const& name)
     return {name, jsValue};
 }
 
-void TiledItem::invokeCallback(Callback& callback)
+void TiledItem::invokeCommonCallback(Callback& callback, QVariantList const& params)
 {
     if (!callback.value.isCallable())
     {
         return;
     }
 
-    auto const result = callback.value.call({qqmlEngine()->toScriptValue(this), qqmlEngine()->toScriptValue(scriptEngine())});
+    QJSValueList jsParams;
+    jsParams.reserve(params.size());
+
+    for (auto const& param : params)
+    {
+        jsParams << qqmlEngine()->toScriptValue(param);
+    }
+
+    auto const result = callback.value.call(jsParams);
 
     if (result.isError())
     {
         qCritical() << "Can't compile callback:" << callback.name << "object:" << objectName() << result.toString();
-    }
-}
-
-void TiledItem::validateObjectName()
-{
-    if (objectName().contains(OBJECT_PATH_DELIM))
-    {
-        qWarning() << "Object name:" << objectName() << "should not contains: \"" << OBJECT_PATH_DELIM << "\"";
     }
 }
 }

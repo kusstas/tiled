@@ -64,6 +64,7 @@ signals:
     void runningChanged(bool running);
     void started();
     void finished();
+    void reached();
 
 protected:
     virtual bool valid() const;
@@ -94,4 +95,3 @@ private:
     Direct m_direct;
 };
 }
-

@@ -34,6 +34,26 @@ TiledItem* ScriptEngine::find(QString const& path) const
     return child;
 }
 
+PathAnimation* ScriptEngine::getPathAnimation(TiledItem* object) const
+{
+    return object->findChild<PathAnimation*>(QString(), Qt::FindDirectChildrenOnly);
+}
+
+QVariantList ScriptEngine::getPathAnimations(TiledItem* object) const
+{
+    auto const animations = object->findChildren<PathAnimation*>(QString(), Qt::FindDirectChildrenOnly);
+
+    QVariantList out;
+    out.reserve(animations.size());
+
+    for (auto const& animation : animations)
+    {
+        out << QVariant::fromValue(animation);
+    }
+
+    return out;
+}
+
 PathAnimation* ScriptEngine::createPathAnimation(TiledItem* object, MapObjectItem* path) const
 {
     PathAnimation* animation = nullptr;

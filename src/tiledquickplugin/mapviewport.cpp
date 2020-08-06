@@ -16,6 +16,7 @@ MapViewport::MapViewport(QQuickItem* parent)
 {
     connect(this, &QQuickItem::widthChanged, this, &MapViewport::updateScale);
     connect(this, &QQuickItem::heightChanged, this, &MapViewport::updateScale);
+    setClip(true);
 }
 
 MapRef const& MapViewport::map() const
@@ -53,7 +54,6 @@ void MapViewport::refresh()
         return;
     }
 
-    m_mapItem.reset();
     m_renderer.reset();
 
     if (!m_map)
