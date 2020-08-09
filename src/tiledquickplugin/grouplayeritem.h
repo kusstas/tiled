@@ -19,6 +19,7 @@ public:
     GroupLayerItem(Tiled::GroupLayer* layer, TiledItem* parent);
 
     void start() override;
+    void exit() override;
 };
 }
 

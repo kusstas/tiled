@@ -15,4 +15,10 @@ void GroupLayerItem::start()
     TiledItem::start();
     LayersContainer::start();
 }
+
+void GroupLayerItem::exit()
+{
+    LayersContainer::exit();
+    TiledItem::exit();
+}
 }

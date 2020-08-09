@@ -27,12 +27,7 @@ TiledItem::TiledItem(Tiled::Object* object, TiledItem* provider, QQuickItem* par
     setParentItem(parent);
 
     m_startCallback = compileCallback(START_CALLBACK_NAME);
-    m_destroyCallback = compileCallback(DESTROY_CALLBACK_NAME);
-}
-
-TiledItem::~TiledItem()
-{
-    invokeCallback(m_destroyCallback);
+    m_exitCallback = compileCallback(EXIT_CALLBACK_NAME);
 }
 
 TiledItem* TiledItem::parentTiledItem() const
@@ -108,6 +103,11 @@ void TiledItem::setTiledProperty(QString const& name, QVariant const& value)
 void TiledItem::start()
 {
     invokeCallback(m_startCallback);
+}
+
+void TiledItem::exit()
+{
+    invokeCallback(m_exitCallback);
 }
 
 void TiledItem::paint(QPainter* /*painter*/)

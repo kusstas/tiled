@@ -104,8 +104,6 @@ void MapViewport::refresh()
     auto const anchors = m_mapItem->property(ANCHORS_PROPERTY).value<QObject*>();
     anchors->setProperty(CENTER_IN_PROPERTY, QVariant::fromValue(this));
     updateScale();
-
-    m_mapItem->start();
 }
 
 void MapViewport::updateScale()

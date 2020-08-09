@@ -23,6 +23,7 @@ public:
             QSharedPointer<Tiled::MapRenderer> const& renderer,
             QPointer<QObject> const& external,
             QQuickItem* parent);
+    ~MapItem() override;
 
     QObject* external() override;
     Tiled::Map* map() override;
@@ -31,6 +32,7 @@ public:
     QQmlEngine* qqmlEngine() override;
 
     void start() override;
+    void exit() override;
     void resetExternal(QPointer<QObject> const& external);
 
 private:

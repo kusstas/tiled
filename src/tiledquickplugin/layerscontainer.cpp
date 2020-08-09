@@ -54,4 +54,12 @@ void LayersContainer::start()
         layer->start();
     }
 }
+
+void LayersContainer::exit()
+{
+    for (auto layer : m_layerItems)
+    {
+        layer->exit();
+    }
+}
 }

@@ -12,14 +12,6 @@ macx {
     DESTDIR = ../../qml/org/mapeditor/Tiled
 }
 
-macx {
-    QMAKE_LIBDIR += $$OUT_PWD/../../bin/Tiled.app/Contents/Frameworks
-} else:win32 {
-    LIBS += -L$$OUT_PWD/../../lib
-} else {
-    QMAKE_LIBDIR = $$OUT_PWD/../../lib $$QMAKE_LIBDIR
-}
-
 # Make sure the Tiled executable can find libtiled
 !win32:!macx:contains(RPATH, yes) {
     QMAKE_RPATHDIR += \$\$ORIGIN/../../../../lib

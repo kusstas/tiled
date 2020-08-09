@@ -19,6 +19,13 @@ MapItem::MapItem(QSharedPointer<Tiled::Map> const& map,
     }
     setSize(QSize(m_map->tileWidth() * m_map->width(), m_map->tileHeight() * m_map->height()));
     m_layersContainer.reset(new LayersContainer(m_map->layers(), this));
+
+    start();
+}
+
+MapItem::~MapItem()
+{
+    exit();
 }
 
 QObject* MapItem::external()
@@ -50,6 +57,12 @@ void MapItem::start()
 {
     TiledItem::start();
     m_layersContainer->start();
+}
+
+void MapItem::exit()
+{
+    m_layersContainer->exit();
+    TiledItem::exit();
 }
 
 void MapItem::resetExternal(QPointer<QObject> const& external)

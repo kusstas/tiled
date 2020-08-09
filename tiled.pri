@@ -13,14 +13,6 @@ macx {
     contains(QT_CONFIG, ppc):CONFIG += x86 ppc
 }
 
-# This allows Tiled to use up to 3 GB on 32-bit systems and 4 GB on
-# 64-bit systems, rather than being limited to just 2 GB.
-win32-g++* {
-    QMAKE_LFLAGS += -Wl,--large-address-aware
-} else:win32 {
-    QMAKE_LFLAGS += /LARGEADDRESSAWARE
-}
-
 CONFIG += depend_includepath c++14 tiled_quick
 
 !isEmpty(USE_FHS_PLUGIN_PATH) {

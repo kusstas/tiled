@@ -31,7 +31,6 @@ public:
 
     TiledItem(Tiled::Object* object, TiledItem* parent);
     TiledItem(Tiled::Object* object, TiledItem* provider, QQuickItem* parent);
-    ~TiledItem() override;
 
     TiledItem* parentTiledItem() const;
     Tiled::Object* object() const;
@@ -51,6 +50,7 @@ public:
     Q_INVOKABLE void setTiledProperty(QString const& name, QVariant const& value);
 
     virtual void start();
+    virtual void exit();
 
 protected:
     void paint(QPainter* painter) override;
@@ -71,7 +71,7 @@ private:
     Tiled::Object* m_object;
     TiledItem* m_provider;
     Callback m_startCallback;
-    Callback m_destroyCallback;
+    Callback m_exitCallback;
 };
 
 template <class T>

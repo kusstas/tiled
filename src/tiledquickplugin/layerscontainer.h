@@ -20,6 +20,7 @@ public:
     ~LayersContainer();
 
     void start();
+    void exit();
 
 private:
     QList<LayerItem*> m_layerItems;

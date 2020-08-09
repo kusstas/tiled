@@ -3,7 +3,7 @@
 namespace TiledQuick
 {
 constexpr auto START_CALLBACK_NAME = "onStart";
-constexpr auto DESTROY_CALLBACK_NAME = "onDestroy";
+constexpr auto EXIT_CALLBACK_NAME = "onExit";
 constexpr auto PRESS_CALLBACK_NAME = "onPress";
 constexpr auto CLICK_CALLBACK_NAME = "onClick";
 constexpr auto RELEASE_CALLBACK_NAME = "onRelease";

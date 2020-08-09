@@ -12,7 +12,7 @@ namespace TiledQuick
 {
 QString const Transition::ANY_STATE = "*";
 
-StateMachine::StateMachne(MapObjectItem* parent)
+StateMachine::StateMachine(MapObjectItem* parent)
     : QObject(parent)
     , m_currentTile(nullptr)
     , m_currentFrame(nullptr)
