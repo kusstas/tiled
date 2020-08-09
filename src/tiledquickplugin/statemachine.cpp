@@ -12,8 +12,10 @@ namespace TiledQuick
 {
 QString const Transition::ANY_STATE = "*";
 
-StateMachine::StateMachine(MapObjectItem* parent)
+StateMachine::StateMachne(MapObjectItem* parent)
     : QObject(parent)
+    , m_currentTile(nullptr)
+    , m_currentFrame(nullptr)
 {
     m_states[QString()] = QSharedPointer<State>(new State(QString(), parent->mapObject()->cell().tile()));
 
