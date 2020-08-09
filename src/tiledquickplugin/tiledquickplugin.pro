@@ -51,6 +51,7 @@ SOURCES += \
     pathanimation.cpp \
     polygonpathanimation.cpp \
     scriptengine.cpp \
+    statemachine.cpp \
     tileditem.cpp \
     tiledquickplugin.cpp \
     mapitem.cpp \
@@ -72,6 +73,7 @@ HEADERS += \
     pathanimation.h \
     polygonpathanimation.h \
     scriptengine.h \
+    statemachine.h \
     tileditem.h \
     tiledquickplugin.h \
     mapitem.h \

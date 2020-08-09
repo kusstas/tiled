@@ -26,6 +26,7 @@
 #include "tileditem.h"
 #include "mapobjectitem.h"
 #include "pathanimation.h"
+#include "statemachine.h"
 
 #include "maploader.h"
 #include "mapviewport.h"
@@ -47,6 +48,7 @@ void TiledQuickPlugin::registerTypes(char const* uri)
     qRegisterMetaType<TiledItem*>("TiledQuick::TiledItem*");
     qRegisterMetaType<MapObjectItem*>("TiledQuick::MapObjectItem*");
     qRegisterMetaType<PathAnimation*>("TiledQuick::PathAnimation*");
+    qRegisterMetaType<StateMachine*>("TiledQuick::StateMachine*");
 
     qmlRegisterAnonymousType<MapRef>(uri, 1);
     qmlRegisterType<MapLoader>(uri, 1, 0, "MapLoader");

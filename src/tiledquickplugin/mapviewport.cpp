@@ -24,6 +24,11 @@ MapRef const& MapViewport::map() const
     return m_map;
 }
 
+QObject* MapViewport::external() const
+{
+    return m_external;
+}
+
 void MapViewport::setMap(MapRef const& map)
 {
     if (m_map == map)
@@ -35,6 +40,22 @@ void MapViewport::setMap(MapRef const& map)
     emit mapChanged(m_map);
 
     refresh();
+}
+
+void MapViewport::setExternal(QObject* external)
+{
+    if (m_external == external)
+    {
+        return;
+    }
+
+    m_external = external;
+    emit externalChanged(m_external);
+
+    if (m_mapItem)
+    {
+        m_mapItem->resetExternal(m_external);
+    }
 }
 
 void MapViewport::componentComplete()
@@ -77,7 +98,8 @@ void MapViewport::refresh()
         break;
     }
 
-    m_mapItem.reset(new MapItem(m_map, m_renderer, this));
+    m_mapItem.reset(new MapItem(m_map, m_renderer, m_external, this));
+    setImplicitSize(m_mapItem->width(), m_mapItem->height());
 
     auto const anchors = m_mapItem->property(ANCHORS_PROPERTY).value<QObject*>();
     anchors->setProperty(CENTER_IN_PROPERTY, QVariant::fromValue(this));

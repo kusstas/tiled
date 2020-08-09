@@ -3,6 +3,8 @@
 #include "mapobject.h"
 #include "tileditem.h"
 
+#include <QScopedPointer>
+
 
 namespace Tiled
 {
@@ -12,16 +14,21 @@ class MapObject;
 namespace TiledQuick
 {
 class ObjectLayerItem;
+class StateMachine;
 
 class MapObjectItem : public TiledItem
 {
     Q_OBJECT
 
+    Q_PROPERTY(TiledQuick::StateMachine* stateMachine READ stateMachine CONSTANT)
+
 public:
     MapObjectItem(Tiled::MapObject* mapObject, ObjectLayerItem* parent);
 
+    StateMachine* stateMachine() const;
     ObjectLayerItem* objectLayer() const;
     Tiled::MapObject* mapObject() const;
+    int id() const override; 
 
 protected:
     static QPointF convertCoordinates(QRectF const& rect, Tiled::Alignment origin);
@@ -34,7 +41,6 @@ protected:
 private:
     void transformPolygon();
     void drawDebug(QPainter* painter);
-
     bool containsPoint(QPointF const& localPos) const;
     bool containsPointInBoundingRect(QPointF const& localPos) const;
 
@@ -42,6 +48,7 @@ private:
     Callback m_pressCallback;
     Callback m_releaseCallback;
     Callback m_clickCallback;
+    StateMachine* m_stateMachine;
     bool m_drawDebug;
     bool m_pressByShape;
     bool m_clikable;

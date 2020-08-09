@@ -11,7 +11,7 @@ namespace TiledQuick
 {
 QString const TiledItem::OBJECT_PATH_DELIM = ".";
 QString const TiledItem::JS_CALLBACK_FORMAT = "(function(%1) { %2 })";
-QStringList const TiledItem::JS_DEFAULT_PARAMS = {"object", "engine"};
+QStringList const TiledItem::JS_DEFAULT_PARAMS = {"object", "engine", "external"};
 constexpr auto PARAMS_JOIN = ",";
 
 TiledItem::TiledItem(Tiled::Object* object, TiledItem* parent)
@@ -55,6 +55,16 @@ bool TiledItem::isProvider() const
     return m_provider == this;
 }
 
+int TiledItem::id() const
+{
+    return 0;
+}
+
+QObject* TiledItem::external()
+{
+    return m_provider->external();
+}
+
 Tiled::Map* TiledItem::map()
 {
     return m_provider->map();
@@ -85,6 +95,16 @@ QString TiledItem::objectNamePath() const
     return parentTiledItem()->objectNamePath() % OBJECT_PATH_DELIM % objectName();
 }
 
+QVariant TiledItem::getTiledProperty(QString const& name) const
+{
+    return object()->property(name);
+}
+
+void TiledItem::setTiledProperty(QString const& name, QVariant const& value)
+{
+    object()->setProperty(name, value);
+}
+
 void TiledItem::start()
 {
     invokeCallback(m_startCallback);
@@ -104,7 +124,9 @@ Callback TiledItem::compileCallback(QString const& name, QStringList const& para
 
 void TiledItem::invokeCallback(Callback& callback, QVariantList const& params)
 {
-    QVariantList allParams = {QVariant::fromValue(this), QVariant::fromValue(scriptEngine())};
+    QVariantList allParams = {QVariant::fromValue(this),
+                              QVariant::fromValue(scriptEngine()),
+                              QVariant::fromValue(external())};
     allParams.append(params);
 
     return invokeCommonCallback(callback, allParams);

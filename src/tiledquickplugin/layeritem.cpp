@@ -22,4 +22,9 @@ Tiled::Layer* LayerItem::layer() const
 {
     return object<Tiled::Layer>();
 }
+
+int LayerItem::id() const
+{
+    return layer()->id();
+}
 }

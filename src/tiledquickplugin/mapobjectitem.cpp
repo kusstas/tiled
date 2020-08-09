@@ -1,6 +1,7 @@
 #include "mapobjectitem.h"
 #include "objectlayeritem.h"
 #include "customattributes.h"
+#include "statemachine.h"
 #include "drawutils.h"
 
 #include <QQmlEngine>
@@ -15,6 +16,7 @@ int const DEBUG_POINT_WIDTH = 15;
 
 MapObjectItem::MapObjectItem(Tiled::MapObject* mapObject, ObjectLayerItem* parent)
     : TiledItem(mapObject, parent)
+    , m_stateMachine(new StateMachine(this))
     , m_drawDebug(false)
     , m_pressByShape(false)
     , m_clikable(false)
@@ -44,6 +46,11 @@ MapObjectItem::MapObjectItem(Tiled::MapObject* mapObject, ObjectLayerItem* paren
     }
 }
 
+StateMachine* MapObjectItem::stateMachine() const
+{
+    return m_stateMachine;
+}
+
 ObjectLayerItem* MapObjectItem::objectLayer() const
 {
     return static_cast<ObjectLayerItem*>(parent());
@@ -52,6 +59,11 @@ ObjectLayerItem* MapObjectItem::objectLayer() const
 Tiled::MapObject* MapObjectItem::mapObject() const
 {
     return object<Tiled::MapObject>();
+}
+
+int MapObjectItem::id() const
+{
+    return mapObject()->id();
 }
 
 QPointF MapObjectItem::convertCoordinates(QRectF const& rect, Tiled::Alignment origin)
@@ -141,26 +153,7 @@ QQuickItem::TransformOrigin MapObjectItem::convert(Tiled::Alignment origin)
 
 void MapObjectItem::paint(QPainter* painter)
 {
-    if (!mapObject()->cell().isEmpty())
-    {
-        auto pixmap = mapObject()->cell().tileset()->tileAt(mapObject()->cell().tileId())->image();
-
-        int scaleX = mapObject()->cell().flippedHorizontally() ? -1 : 1;
-        int scaleY = mapObject()->cell().flippedVertically() ? -1 : 1;
-
-        if (scaleX < 0 || scaleY < 0)
-        {
-            QTransform transform;
-            transform.scale(scaleX, scaleY);
-
-            pixmap = pixmap.transformed(transform);
-        }
-
-        QRect const target(0, 0, width(), height());
-        QRect const source(0, 0, pixmap.width(), pixmap.height());
-
-        DrawUtils::paintPixmap(painter, target, source, pixmap, objectLayer()->layer()->tintColor());
-    }
+    m_stateMachine->paint(painter);
 
     if (m_drawDebug)
     {

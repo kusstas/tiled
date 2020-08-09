@@ -23,7 +23,7 @@ TiledItem* ScriptEngine::find(QString const& path) const
 
     for (auto const& name : objs)
     {
-        child = child->findChild<TiledItem*>(name.toString());
+        child = child->findChild<TiledItem*>(name.toString(), Qt::FindDirectChildrenOnly);
 
         if (!child)
         {
@@ -32,6 +32,18 @@ TiledItem* ScriptEngine::find(QString const& path) const
     }
 
     return child;
+}
+
+TiledItem* ScriptEngine::find(int id) const
+{
+    auto const children = m_provider->findChildren<TiledItem*>();
+
+    auto const finded = std::find_if(children.cbegin(), children.cend(), [id] (TiledItem* item)
+    {
+        return item->id() == id;
+    });
+
+    return finded != children.cend() ? *finded : nullptr;
 }
 
 PathAnimation* ScriptEngine::getPathAnimation(TiledItem* object) const

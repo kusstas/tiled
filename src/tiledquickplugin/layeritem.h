@@ -18,6 +18,7 @@ public:
     LayerItem(Tiled::Layer* layer, TiledItem* parent);
 
     Tiled::Layer* layer() const;
+    int id() const override;
 };
 }
 
