@@ -55,6 +55,16 @@ int TiledItem::id() const
     return 0;
 }
 
+QString TiledItem::objectNamePath() const
+{
+    if (isProvider() || parentTiledItem()->isProvider())
+    {
+        return objectName();
+    }
+
+    return parentTiledItem()->objectNamePath() % OBJECT_PATH_DELIM % objectName();
+}
+
 QObject* TiledItem::external()
 {
     return m_provider->external();
@@ -78,16 +88,6 @@ ScriptEngine* TiledItem::scriptEngine()
 QQmlEngine* TiledItem::qqmlEngine()
 {
     return m_provider->qqmlEngine();
-}
-
-QString TiledItem::objectNamePath() const
-{
-    if (isProvider() || parentTiledItem()->isProvider())
-    {
-        return objectName();
-    }
-
-    return parentTiledItem()->objectNamePath() % OBJECT_PATH_DELIM % objectName();
 }
 
 QVariant TiledItem::getTiledProperty(QString const& name) const

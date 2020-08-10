@@ -25,6 +25,7 @@ class TiledItem : public QQuickPaintedItem
     Q_OBJECT
 
     Q_PROPERTY(int id READ id CONSTANT)
+    Q_PROPERTY(QString objectNamePath READ objectNamePath CONSTANT)
 
 public:
     static QString const OBJECT_PATH_DELIM;
@@ -39,13 +40,14 @@ public:
     bool isProvider() const;
 
     virtual int id() const;
+    QString objectNamePath() const;
+
     virtual QObject* external();
     virtual Tiled::Map* map();
     virtual Tiled::MapRenderer* renderer();
     virtual ScriptEngine* scriptEngine();
     virtual QQmlEngine* qqmlEngine();
 
-    Q_INVOKABLE QString objectNamePath() const;
     Q_INVOKABLE QVariant getTiledProperty(QString const& name) const;
     Q_INVOKABLE void setTiledProperty(QString const& name, QVariant const& value);
 
