@@ -2,6 +2,7 @@
 #include "objectlayeritem.h"
 #include "customattributes.h"
 #include "statemachine.h"
+#include "textdata.h"
 #include "drawutils.h"
 
 #include <QQmlEngine>
@@ -33,6 +34,12 @@ MapObjectItem::MapObjectItem(Tiled::MapObject* mapObject, ObjectLayerItem* paren
 
     validateObjectName();
 
+    if (mapObject->shape() == Tiled::MapObject::Shape::Text)
+    {
+        m_textData = new TextData(mapObject->textData(), this);
+        connect(m_textData, &TextData::changed, this, [this] () { update(); });
+    }
+
     m_pressCallback = compileCallback(PRESS_CALLBACK_NAME);
     m_releaseCallback = compileCallback(RELEASE_CALLBACK_NAME);
     m_clickCallback = compileCallback(CLICK_CALLBACK_NAME);
@@ -49,6 +56,11 @@ MapObjectItem::MapObjectItem(Tiled::MapObject* mapObject, ObjectLayerItem* paren
 StateMachine* MapObjectItem::stateMachine() const
 {
     return m_stateMachine;
+}
+
+TextData* MapObjectItem::textData() const
+{
+    return m_textData;
 }
 
 ObjectLayerItem* MapObjectItem::objectLayer() const

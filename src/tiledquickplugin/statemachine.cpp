@@ -1,6 +1,7 @@
 #include "objectlayeritem.h"
 #include "mapobjectitem.h"
 #include "statemachine.h"
+#include "textdata.h"
 #include "drawutils.h"
 #include "map.h"
 
@@ -47,7 +48,20 @@ void StateMachine::paint(QPainter* painter)
 
     if (pixmap.isNull())
     {
-        return;
+        if (auto const textData = mapObjectItem()->textData())
+        {
+            pixmap = QPixmap(mapObjectItem()->size().toSize());
+            pixmap.fill(Qt::transparent);
+
+            QPainter textPainter(&pixmap);
+            textPainter.setFont(textData->font());
+            textPainter.setPen(textData->color());
+            textPainter.drawText(QRect(0, 0, pixmap.width(), pixmap.height()), textData->text(), textData->textOption());
+        }
+        else
+        {
+            return;
+        }
     }
 
     int scaleX = cell()->flippedHorizontally() ? -1 : 1;
