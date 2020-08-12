@@ -18,6 +18,7 @@ int const DEBUG_POINT_WIDTH = 15;
 MapObjectItem::MapObjectItem(Tiled::MapObject* mapObject, ObjectLayerItem* parent)
     : TiledItem(mapObject, parent)
     , m_stateMachine(new StateMachine(this))
+    , m_textData(tryCreateTextData())
     , m_drawDebug(false)
     , m_pressByShape(false)
     , m_clikable(false)
@@ -33,12 +34,6 @@ MapObjectItem::MapObjectItem(Tiled::MapObject* mapObject, ObjectLayerItem* paren
     setVisible(mapObject->isVisible());
 
     validateObjectName();
-
-    if (mapObject->shape() == Tiled::MapObject::Shape::Text)
-    {
-        m_textData = new TextData(mapObject->textData(), this);
-        connect(m_textData, &TextData::changed, this, [this] () { update(); });
-    }
 
     m_pressCallback = compileCallback(PRESS_CALLBACK_NAME);
     m_releaseCallback = compileCallback(RELEASE_CALLBACK_NAME);
@@ -294,5 +289,18 @@ bool MapObjectItem::containsPoint(QPointF const& localPos) const
 bool MapObjectItem::containsPointInBoundingRect(QPointF const& localPos) const
 {
     return QRectF(0, 0, width(), height()).contains(localPos);
+}
+
+TextData* MapObjectItem::tryCreateTextData()
+{
+    TextData* textData = nullptr;
+
+    if (mapObject()->shape() == Tiled::MapObject::Shape::Text)
+    {
+        textData = new TextData(mapObject()->textData(), this);
+        connect(textData, &TextData::changed, this, [this] () { update(); });
+    }
+
+    return textData;
 }
 }

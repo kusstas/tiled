@@ -46,6 +46,7 @@ private:
     void drawDebug(QPainter* painter);
     bool containsPoint(QPointF const& localPos) const;
     bool containsPointInBoundingRect(QPointF const& localPos) const;
+    TextData* tryCreateTextData();
 
 private:
     Callback m_pressCallback;
