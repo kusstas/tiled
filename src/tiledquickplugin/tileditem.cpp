@@ -28,6 +28,9 @@ TiledItem::TiledItem(Tiled::Object* object, TiledItem* provider, QQuickItem* par
 
     m_startCallback = compileCallback(START_CALLBACK_NAME);
     m_exitCallback = compileCallback(EXIT_CALLBACK_NAME);
+    m_timeoutCallback = compileCallback(TIMEOUT_CALLBACK_NAME);
+
+    connect(timer(), &QTimer::timeout, this, &TiledItem::timeout);
 }
 
 TiledItem* TiledItem::parentTiledItem() const
@@ -63,6 +66,11 @@ QString TiledItem::objectNamePath() const
     }
 
     return parentTiledItem()->objectNamePath() % OBJECT_PATH_DELIM % objectName();
+}
+
+QTimer* TiledItem::timer()
+{
+    return &m_timer;
 }
 
 QObject* TiledItem::external()
@@ -188,5 +196,10 @@ void TiledItem::invokeCommonCallback(Callback& callback, QVariantList const& par
     {
         qCritical() << "Can't compile callback:" << callback.name << "object:" << objectName() << result.toString();
     }
+}
+
+void TiledItem::timeout()
+{
+    invokeCallback(m_timeoutCallback);
 }
 }

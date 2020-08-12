@@ -2,6 +2,8 @@
 
 #include <QQuickPaintedItem>
 #include <QJSValue>
+#include <QTimer>
+
 
 namespace Tiled
 {
@@ -26,6 +28,7 @@ class TiledItem : public QQuickPaintedItem
 
     Q_PROPERTY(int id READ id CONSTANT)
     Q_PROPERTY(QString objectNamePath READ objectNamePath CONSTANT)
+    Q_PROPERTY(QTimer* timer READ timer CONSTANT)
 
 public:
     static QString const OBJECT_PATH_DELIM;
@@ -41,6 +44,7 @@ public:
 
     virtual int id() const;
     QString objectNamePath() const;
+    QTimer* timer();
 
     virtual QObject* external();
     virtual Tiled::Map* map();
@@ -65,15 +69,18 @@ protected:
 private:
     Callback compileCommonCallback(QString const& name, QStringList const& params);
     void invokeCommonCallback(Callback& callback, QVariantList const& params);
+    void timeout();
 
 private:
     static QString const JS_CALLBACK_FORMAT;
     static QStringList const JS_DEFAULT_PARAMS;
 
+    QTimer m_timer;
     Tiled::Object* m_object;
     TiledItem* m_provider;
     Callback m_startCallback;
     Callback m_exitCallback;
+    Callback m_timeoutCallback;
 };
 
 template <class T>
