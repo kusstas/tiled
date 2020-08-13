@@ -15,15 +15,18 @@ ObjectLayerItem::ObjectLayerItem(Tiled::ObjectGroup* layer, TiledItem* parent)
     }
 }
 
-void ObjectLayerItem::start()
+QList<MapObjectItem*> const& ObjectLayerItem::collidedObjects() const
 {
-    LayerItem::start();
+    return m_collidedObjects;
+}
 
-    auto const& objects = findChildren<MapObjectItem*>();
+void ObjectLayerItem::registerCollidedObject(MapObjectItem* object)
+{
+    m_collidedObjects.append(object);
+}
 
-    for (auto const& object : objects)
-    {
-        object->start();
-    }
+void ObjectLayerItem::unregisterCollidedObject(MapObjectItem* object)
+{
+    m_collidedObjects.removeOne(object);
 }
 }

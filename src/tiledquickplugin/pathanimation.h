@@ -21,6 +21,8 @@ class PathAnimation : public QObject
     Q_PROPERTY(int loops READ loops WRITE setLoops NOTIFY loopsChanged)
     Q_PROPERTY(bool backward READ backward WRITE setBackward NOTIFY backwardChanged)
     Q_PROPERTY(bool running READ running WRITE setRunning NOTIFY runningChanged)
+    Q_PROPERTY(Direct direct READ direct NOTIFY directChanged)
+    Q_PROPERTY(int passedLoops READ passedLoops NOTIFY passedLoopsChanged)
 
 public:
     enum Loops
@@ -46,6 +48,8 @@ public:
     int loops() const;
     bool backward() const;
     bool running() const;
+    Direct direct() const;
+    int passedLoops() const;
 
     Q_INVOKABLE void start();
     Q_INVOKABLE void stop();
@@ -62,6 +66,8 @@ signals:
     void loopsChanged(int loops);
     void backwardChanged(bool backward);
     void runningChanged(bool running);
+    void directChanged(Direct direct);
+    void passedLoopsChanged(int passedLoops);
     void started();
     void finished();
     void reached();
@@ -71,13 +77,14 @@ protected:
     virtual void update(qreal ms) = 0;
     virtual void resetStep();
 
-    Direct direct() const;
     void finishStep();
     QPointF convertCoordinate(QPointF const& point) const;
 
 private:
     void timeout();
     void finishLoop();
+    void setDirect(Direct direct);
+    void setPassedLoops(int passedLoops);
 
 private:
     static int const UPDATE_INTERVAL;
@@ -88,10 +95,10 @@ private:
     int m_loops;
     bool m_backward;
     bool m_running;
+    Direct m_direct;
+    int m_passedLoops;
 
     QTimer m_timer;
     QElapsedTimer m_elapsedTimer;
-    int m_passedLoops;
-    Direct m_direct;
 };
 }

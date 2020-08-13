@@ -15,6 +15,9 @@ QColor const DEBUG_PEN_COLOR = Qt::red;
 int const DEBUG_PEN_WIDTH = 6;
 int const DEBUG_POINT_WIDTH = 15;
 
+constexpr auto COLLIDED_OBJECT_PARAM_NAME = "collidedObject";
+
+
 MapObjectItem::MapObjectItem(Tiled::MapObject* mapObject, ObjectLayerItem* parent)
     : TiledItem(mapObject, parent)
     , m_stateMachine(new StateMachine(this))
@@ -23,6 +26,7 @@ MapObjectItem::MapObjectItem(Tiled::MapObject* mapObject, ObjectLayerItem* paren
     , m_pressByShape(false)
     , m_clikable(false)
     , m_pressed(false)
+    , m_collidingEnabled(false)
 {
     transformPolygon();
 
@@ -38,13 +42,20 @@ MapObjectItem::MapObjectItem(Tiled::MapObject* mapObject, ObjectLayerItem* paren
     m_pressCallback = compileCallback(PRESS_CALLBACK_NAME);
     m_releaseCallback = compileCallback(RELEASE_CALLBACK_NAME);
     m_clickCallback = compileCallback(CLICK_CALLBACK_NAME);
+    m_collideEnterCallback = compileCallback(COLLIDE_ENTER_CALLBACK_NAME, {COLLIDED_OBJECT_PARAM_NAME});
+    m_collideExitCallback = compileCallback(COLLIDE_EXIT_CALLBACK_NAME, {COLLIDED_OBJECT_PARAM_NAME});
     m_drawDebug = mapObject->properties().value(DRAW_DEBUG_NAME, m_drawDebug).toBool();
     m_pressByShape = mapObject->properties().value(PRESS_BY_SHAPE_NAME, m_pressByShape).toBool();
     m_clikable = mapObject->properties().value(CLICKABLE_NAME, m_clikable).toBool();
+    m_collidingEnabled = mapObject->properties().value(COLLIDING_ENABLED_NAME, m_collidingEnabled).toBool();
 
     if (m_clikable)
     {
         setAcceptedMouseButtons(Qt::AllButtons);
+    }
+    if (m_collidingEnabled)
+    {
+        parent->registerCollidedObject(this);
     }
 }
 
@@ -56,6 +67,11 @@ StateMachine* MapObjectItem::stateMachine() const
 TextData* MapObjectItem::textData() const
 {
     return m_textData;
+}
+
+bool MapObjectItem::pressed() const
+{
+    return m_pressed;
 }
 
 ObjectLayerItem* MapObjectItem::objectLayer() const
@@ -71,6 +87,16 @@ Tiled::MapObject* MapObjectItem::mapObject() const
 int MapObjectItem::id() const
 {
     return mapObject()->id();
+}
+
+void MapObjectItem::collideEnter(MapObjectItem* collidedObject)
+{
+    invokeCallback(m_collideEnterCallback, {QVariant::fromValue(collidedObject)});
+}
+
+void MapObjectItem::collideExit(MapObjectItem* collidedObject)
+{
+    invokeCallback(m_collideExitCallback, {QVariant::fromValue(collidedObject)});
 }
 
 QPointF MapObjectItem::convertCoordinates(QRectF const& rect, Tiled::Alignment origin)
@@ -158,6 +184,12 @@ QQuickItem::TransformOrigin MapObjectItem::convert(Tiled::Alignment origin)
     return QQuickItem::TopLeft;
 }
 
+void MapObjectItem::onDestroyItem()
+{
+    objectLayer()->unregisterCollidedObject(this);
+    TiledItem::onDestroyItem();
+}
+
 void MapObjectItem::paint(QPainter* painter)
 {
     m_stateMachine->paint(painter);
@@ -176,7 +208,7 @@ void MapObjectItem::mousePressEvent(QMouseEvent* event)
         return;
     }
 
-    m_pressed = true;
+    setPressed(true);
 
     event->accept();
     invokeCallback(m_pressCallback);
@@ -184,14 +216,13 @@ void MapObjectItem::mousePressEvent(QMouseEvent* event)
 
 void MapObjectItem::mouseReleaseEvent(QMouseEvent* event)
 {
-    if (!m_pressed)
+    if (!pressed())
     {
         QQuickPaintedItem::mouseReleaseEvent(event);
         return;
     }
 
-    m_pressed = false;
-
+    setPressed(false);
 
     event->accept();
     invokeCallback(m_releaseCallback);
@@ -302,5 +333,16 @@ TextData* MapObjectItem::tryCreateTextData()
     }
 
     return textData;
+}
+
+void MapObjectItem::setPressed(bool pressed)
+{
+    if (m_pressed == pressed)
+    {
+        return;
+    }
+
+    m_pressed = pressed;
+    emit pressedChanged(m_pressed);
 }
 }

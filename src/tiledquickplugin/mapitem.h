@@ -5,7 +5,6 @@
 #include "map.h"
 #include "maprenderer.h"
 #include "scriptengine.h"
-#include "layerscontainer.h"
 
 #include <QPointer>
 #include <QSharedPointer>
@@ -14,6 +13,8 @@
 
 namespace TiledQuick
 {
+class MapObjectItem;
+
 class MapItem : public TiledItem
 {
     Q_OBJECT
@@ -31,15 +32,18 @@ public:
     ScriptEngine* scriptEngine() override;
     QQmlEngine* qqmlEngine() override;
 
-    void start() override;
-    void exit() override;
     void resetExternal(QPointer<QObject> const& external);
 
 private:
+    void detectColliding();
+
+private:
+    static int const DETECT_COLLIDING_INTERVAL;
+
     QSharedPointer<Tiled::Map> m_map;
     QSharedPointer<Tiled::MapRenderer> m_renderer;
-    QScopedPointer<LayersContainer> m_layersContainer;
     ScriptEngine m_scriptEngine;
     QPointer<QObject> m_external;
+    QTimer m_detectCollidingTimer;
 };
 } // namespace TiledQuick

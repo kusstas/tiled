@@ -15,8 +15,8 @@ PathAnimation::PathAnimation(TiledItem* object, MapObjectItem* path)
     , m_loops(Once)
     , m_backward(false)
     , m_running(false)
-    , m_passedLoops(0)
     , m_direct(Forward)
+    , m_passedLoops(0)
 {
     m_timer.setSingleShot(false);
     m_timer.setInterval(UPDATE_INTERVAL);
@@ -55,6 +55,16 @@ bool PathAnimation::running() const
     return m_running;
 }
 
+PathAnimation::Direct PathAnimation::direct() const
+{
+    return m_direct;
+}
+
+int PathAnimation::passedLoops() const
+{
+    return m_passedLoops;
+}
+
 void PathAnimation::start()
 {
     reset();
@@ -74,8 +84,8 @@ void PathAnimation::stop()
 void PathAnimation::reset()
 {
     m_elapsedTimer.restart();
-    m_direct = Forward;
-    m_passedLoops = 0;
+    setDirect(Forward);
+    setPassedLoops(0);
 
     resetStep();
 }
@@ -149,16 +159,11 @@ void PathAnimation::resetStep()
 {
 }
 
-PathAnimation::Direct PathAnimation::direct() const
-{
-    return m_direct;
-}
-
 void PathAnimation::finishStep()
 {
     if (backward())
     {
-        m_direct = m_direct > Center ? Backward : Forward;
+        setDirect(direct() > Center ? Backward : Forward);
     }
 
     resetStep();
@@ -182,12 +187,34 @@ void PathAnimation::timeout()
 
 void PathAnimation::finishLoop()
 {
-    ++m_passedLoops;
+    setPassedLoops(passedLoops() + 1);
 
-    if (m_loops > Infinite && m_loops >= m_passedLoops)
+    if (loops() > Infinite && passedLoops() >= loops())
     {
         emit reached();
         stop();
     }
+}
+
+void PathAnimation::setDirect(Direct direct)
+{
+    if (m_direct == direct)
+    {
+        return;
+    }
+
+    m_direct = direct;
+    emit directChanged(m_direct);
+}
+
+void PathAnimation::setPassedLoops(int passedLoops)
+{
+    if (m_passedLoops == passedLoops)
+    {
+        return;
+    }
+
+    m_passedLoops = passedLoops;
+    emit passedLoopsChanged(m_passedLoops);
 }
 }

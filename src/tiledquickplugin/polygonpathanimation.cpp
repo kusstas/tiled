@@ -7,7 +7,7 @@ namespace TiledQuick
 PolygonPathAnimation::PolygonPathAnimation(TiledItem* object, MapObjectItem* path)
     : PathAnimation(object, path)
     , m_line(0)
-    , m_progress(0)
+    , m_lineProgress(0)
 {
     QPolygonF polygon = path->mapObject()->shape() == Tiled::MapObject::Rectangle
                         ? QPolygonF(QRectF(0, 0, path->width(), path->height()))
@@ -30,6 +30,16 @@ PolygonPathAnimation::PolygonPathAnimation(TiledItem* object, MapObjectItem* pat
 QList<int> const& PolygonPathAnimation::intervals() const
 {
     return m_intervals;
+}
+
+int PolygonPathAnimation::line() const
+{
+    return m_line;
+}
+
+qreal PolygonPathAnimation::lineProgress() const
+{
+    return m_lineProgress;
 }
 
 void PolygonPathAnimation::setIntervals(QList<int> const& intervals)
@@ -85,37 +95,43 @@ bool PolygonPathAnimation::valid() const
 
 void PolygonPathAnimation::update(qreal ms)
 {
-    qreal diff = direct() * ms / m_intervals[m_line];
-    m_progress = qMin(1.0, qMax(0.0, m_progress + diff));
+    bool finish = false;
+    int nextLine = line();
+    qreal diff = direct() * ms / m_intervals[line()];
+    qreal progress = qMin(1.0, qMax(0.0, lineProgress() + diff));
 
-    object()->setPosition(convertCoordinate(m_lines[m_line].pointAt(m_progress)));
+    object()->setPosition(convertCoordinate(m_lines[line()].pointAt(progress)));
 
     switch (direct())
     {
-    case TiledQuick::PathAnimation::Backward:
-        if (m_progress <= 0)
+    case Backward:
+        if (progress <= 0)
         {
-            m_progress = 1;
-            --m_line;
+            progress = 1;
+            --nextLine;
         }
-        if (m_line < 0)
-        {
-            finishStep();
-        }
+        finish = nextLine < 0;
         break;
-    case TiledQuick::PathAnimation::Forward:
-        if (m_progress >= 1)
+    case Forward:
+        if (progress >= 1)
         {
-            m_progress = 0;
-            ++m_line;
+            progress = 0;
+            ++nextLine;
         }
-        if (m_line >= m_lines.size())
-        {
-            finishStep();
-        }
+        finish = nextLine >= m_lines.size();
         break;
     default:
         break;
+    }
+
+    if (finish)
+    {
+        finishStep();
+    }
+    else
+    {
+        setLine(nextLine);
+        setLineProgress(progress);
     }
 }
 
@@ -124,15 +140,32 @@ void PolygonPathAnimation::resetStep()
     switch (direct())
     {
     case TiledQuick::PathAnimation::Backward:
-        m_line = m_lines.size() - 1;
-        m_progress = 1;
+        setLine(m_lines.size() - 1);
+        setLineProgress(1);
         break;
     case TiledQuick::PathAnimation::Forward:
-        m_line = 0;
-        m_progress = 0;
+        setLine(0);
+        setLineProgress(0);
         break;
     default:
         break;
     }
+}
+
+void PolygonPathAnimation::setLine(int line)
+{
+    if (m_line == line)
+    {
+        return;
+    }
+
+    m_line = line;
+    emit lineChanged(m_line);
+}
+
+void PolygonPathAnimation::setLineProgress(qreal lineProgress)
+{
+    m_lineProgress = lineProgress;
+    emit lineProgressChanged(m_lineProgress);
 }
 }

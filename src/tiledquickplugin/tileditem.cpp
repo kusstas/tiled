@@ -10,7 +10,7 @@
 namespace TiledQuick
 {
 QString const TiledItem::OBJECT_PATH_DELIM = ".";
-QString const TiledItem::JS_CALLBACK_FORMAT = "(function(%1) { %2 })";
+QString const TiledItem::JS_CALLBACK_FORMAT = "(function(%1) { %2\n })";
 QStringList const TiledItem::JS_DEFAULT_PARAMS = {"object", "engine", "external"};
 constexpr auto PARAMS_JOIN = ",";
 
@@ -27,7 +27,7 @@ TiledItem::TiledItem(Tiled::Object* object, TiledItem* provider, QQuickItem* par
     setParentItem(parent);
 
     m_startCallback = compileCallback(START_CALLBACK_NAME);
-    m_exitCallback = compileCallback(EXIT_CALLBACK_NAME);
+    m_destroyCallback = compileCallback(DESTROY_CALLBACK_NAME);
     m_timeoutCallback = compileCallback(TIMEOUT_CALLBACK_NAME);
 
     connect(timer(), &QTimer::timeout, this, &TiledItem::timeout);
@@ -98,6 +98,28 @@ QQmlEngine* TiledItem::qqmlEngine()
     return m_provider->qqmlEngine();
 }
 
+void TiledItem::start()
+{
+    invokeCallback(m_startCallback);
+
+    for (auto const child : findChildren<TiledItem*>(QString(), Qt::FindDirectChildrenOnly))
+    {
+        child->start();
+    }
+}
+
+void TiledItem::destroyItem()
+{
+    onDestroyItem();
+
+    for (auto const child : findChildren<TiledItem*>(QString(), Qt::FindDirectChildrenOnly))
+    {
+        child->destroyItem();
+    }
+
+    deleteLater();
+}
+
 QVariant TiledItem::getTiledProperty(QString const& name) const
 {
     return object()->property(name);
@@ -108,14 +130,9 @@ void TiledItem::setTiledProperty(QString const& name, QVariant const& value)
     object()->setProperty(name, value);
 }
 
-void TiledItem::start()
+void TiledItem::onDestroyItem()
 {
-    invokeCallback(m_startCallback);
-}
-
-void TiledItem::exit()
-{
-    invokeCallback(m_exitCallback);
+    invokeCallback(m_destroyCallback);
 }
 
 void TiledItem::paint(QPainter* /*painter*/)

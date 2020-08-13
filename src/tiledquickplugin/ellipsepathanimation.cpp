@@ -32,6 +32,11 @@ qreal EllipsePathAnimation::endAngle() const
     return m_endAngle;
 }
 
+qreal EllipsePathAnimation::angle() const
+{
+    return m_angle;
+}
+
 void EllipsePathAnimation::setInterval(int interval)
 {
     if (m_interval == interval)
@@ -78,30 +83,31 @@ bool EllipsePathAnimation::valid() const
 
 void EllipsePathAnimation::update(qreal ms)
 {
-    m_angle += ((ms / interval()) * (implicitEndAngle() - implicitStartAngle()));
+    bool finish = false;
+    auto newAngle = angle() + ((ms / interval()) * (implicitEndAngle() - implicitStartAngle()));
 
-    auto const realAngle = m_angle * FULL_CIRCLE;
+    auto const realAngle = newAngle * FULL_CIRCLE;
     object()->setPosition(convertCoordinate({path()->width() * std::cos(realAngle), path()->height() * std::sin(realAngle)}));
 
     if (implicitStartAngle() < implicitEndAngle())
     {
-        if (m_angle >= implicitEndAngle())
-        {
-            finishStep();
-        }
+        finish = newAngle >= implicitEndAngle();
     }
     else
     {
-        if (m_angle <= implicitEndAngle())
-        {
-            finishStep();
-        }
+        finish = newAngle <= implicitEndAngle();
+    }
+
+    setAngle(newAngle);
+    if (finish)
+    {
+        finishStep();
     }
 }
 
 void EllipsePathAnimation::resetStep()
 {
-    m_angle = implicitStartAngle();
+    setAngle(implicitStartAngle());
 }
 
 qreal EllipsePathAnimation::implicitStartAngle() const
@@ -112,5 +118,11 @@ qreal EllipsePathAnimation::implicitStartAngle() const
 qreal EllipsePathAnimation::implicitEndAngle() const
 {
     return direct() == Forward ? endAngle() : startAngle();
+}
+
+void EllipsePathAnimation::setAngle(qreal angle)
+{
+    m_angle = angle;
+    emit angleChanged(m_angle);
 }
 }

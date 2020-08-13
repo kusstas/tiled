@@ -52,18 +52,16 @@ public:
     virtual ScriptEngine* scriptEngine();
     virtual QQmlEngine* qqmlEngine();
 
+    void start();
+    Q_INVOKABLE void destroyItem();
     Q_INVOKABLE QVariant getTiledProperty(QString const& name) const;
     Q_INVOKABLE void setTiledProperty(QString const& name, QVariant const& value);
 
-    virtual void start();
-    virtual void exit();
-
 protected:
+    virtual void onDestroyItem();
     void paint(QPainter* painter) override;
-
     Callback compileCallback(QString const& name, QStringList const& params = {});
     void invokeCallback(Callback& callback, QVariantList const& params = {});
-
     void validateObjectName();
 
 private:
@@ -79,7 +77,7 @@ private:
     Tiled::Object* m_object;
     TiledItem* m_provider;
     Callback m_startCallback;
-    Callback m_exitCallback;
+    Callback m_destroyCallback;
     Callback m_timeoutCallback;
 };
 

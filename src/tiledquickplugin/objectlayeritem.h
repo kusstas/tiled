@@ -10,7 +10,7 @@ class ObjectGroup;
 
 namespace TiledQuick
 {
-class MapItem;
+class MapObjectItem;
 
 class ObjectLayerItem : public LayerItem
 {
@@ -19,7 +19,13 @@ class ObjectLayerItem : public LayerItem
 public:
     ObjectLayerItem(Tiled::ObjectGroup* layer, TiledItem* parent);
 
-    void start() override;
+    QList<MapObjectItem*> const& collidedObjects() const;
+
+    void registerCollidedObject(MapObjectItem* object);
+    void unregisterCollidedObject(MapObjectItem* object);
+
+private:
+    QList<MapObjectItem*> m_collidedObjects;
 };
 }
 

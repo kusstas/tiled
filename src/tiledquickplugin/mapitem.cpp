@@ -1,8 +1,13 @@
 #include "mapitem.h"
+#include "objectlayeritem.h"
+#include "mapobjectitem.h"
+#include "layerscreator.h"
 
 
 namespace TiledQuick
 {
+int const MapItem::DETECT_COLLIDING_INTERVAL = 2;
+
 MapItem::MapItem(QSharedPointer<Tiled::Map> const& map,
                  QSharedPointer<Tiled::MapRenderer> const& renderer,
                  QPointer<QObject> const& external,
@@ -17,15 +22,20 @@ MapItem::MapItem(QSharedPointer<Tiled::Map> const& map,
     {
         setFillColor(m_map->backgroundColor());
     }
+
     setSize(QSize(m_map->tileWidth() * m_map->width(), m_map->tileHeight() * m_map->height()));
-    m_layersContainer.reset(new LayersContainer(m_map->layers(), this));
+    LayersCreator::create(m_map->layers(), this);
+
+    m_detectCollidingTimer.setSingleShot(false);
+    m_detectCollidingTimer.setTimerType(Qt::PreciseTimer);
+    connect(&m_detectCollidingTimer, &QTimer::timeout, this, &MapItem::detectColliding);
 
     start();
 }
 
 MapItem::~MapItem()
 {
-    exit();
+    destroyItem();
 }
 
 QObject* MapItem::external()
@@ -53,20 +63,12 @@ QQmlEngine* MapItem::qqmlEngine()
     return qmlEngine(parentItem());
 }
 
-void MapItem::start()
-{
-    TiledItem::start();
-    m_layersContainer->start();
-}
-
-void MapItem::exit()
-{
-    m_layersContainer->exit();
-    TiledItem::exit();
-}
-
 void MapItem::resetExternal(QPointer<QObject> const& external)
 {
     m_external = external;
+}
+
+void MapItem::detectColliding()
+{
 }
 }

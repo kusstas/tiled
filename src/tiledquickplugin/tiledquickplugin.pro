@@ -36,7 +36,7 @@ SOURCES += \
     grouplayeritem.cpp \
     imagelayeritem.cpp \
     layeritem.cpp \
-    layerscontainer.cpp \
+    layerscreator.cpp \
     mapobjectitem.cpp \
     mapviewport.cpp \
     objectlayeritem.cpp \
@@ -58,7 +58,7 @@ HEADERS += \
     grouplayeritem.h \
     imagelayeritem.h \
     layeritem.h \
-    layerscontainer.h \
+    layerscreator.h \
     mapobjectitem.h \
     mapref.h \
     mapviewport.h \

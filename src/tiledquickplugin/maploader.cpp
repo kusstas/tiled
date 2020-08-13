@@ -2,6 +2,7 @@
 
 #include "map.h"
 #include "mapreader.h"
+#include "mapwriter.h"
 #include "tiled.h"
 #include "tileset.h"
 
